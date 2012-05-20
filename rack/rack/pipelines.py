@@ -173,7 +173,7 @@ class MongoDBPipeline(object):
                     dict(
                         cloud_account_id=self.user_id,
                         invoice_id={"$exists": True, "$ne": ""}
-                    )]
+                    ))]
 
     def close_spider(self, spider):
         rusage = []

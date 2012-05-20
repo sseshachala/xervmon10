@@ -75,8 +75,6 @@ class StatusPipeline(object):
                        self.receiver_email, self.sender_email, status, cmd)
 
         msg = header
-        
-
         user = self.session.query(Users).filter_by(id=self.user_id).first()
         for k, v in user.__dict__.items():
             if k.startswith('_') or (k == 'password'):
@@ -170,7 +168,12 @@ class MongoDBPipeline(object):
             return
         spider.username = u
         spider.password = p
-        self.old_invoices = [i for i in self.mongodb[RackServers._collection_name].find(dict(cloud_account_id=self.user_id, invoice_id={"$gt":{}}]
+        self.old_invoices = [i for i in
+                self.mongodb[RackServers._collection_name].find(
+                    dict(
+                        cloud_account_id=self.user_id,
+                        invoice_id={"$exists": True, "$ne": ""}
+                    )]
 
     def close_spider(self, spider):
         rusage = []

@@ -3,12 +3,16 @@
 import pymongo
 import csv
 import datetime
+from dateutil.relativedata import relativedata
 import smtplib
 import StringIO
+import urllib2
+
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from scrapy.conf import settings
 from scrapy import log
 from rack.items import *
@@ -168,12 +172,39 @@ class MongoDBPipeline(object):
             return
         spider.username = u
         spider.password = p
-        self.old_invoices = [i for i in
+        old_invoices = [i for i in
                 self.mongodb[RackServers._collection_name].find(
                     dict(
                         cloud_account_id=self.user_id,
                         invoice_id={"$exists": True, "$ne": ""}
                     ))]
+        spider.old_invoices = [i['invoice_id'] for i in old_invoices]
+        filtered_inv = sorted(old_invoices, key=lambda k: k['endtime'],
+                reverse=True)
+        try:
+            last_inv = filtered_inv[0]
+        except IndexError:
+            last_inv = None
+        now = datetime.datetime.now()
+        if last_inv and isinstance(type(last_inv['endtime']), now):
+            last_date = last_inv['endtime'] + relativedelta(months=+1)
+            if last_date < now:
+                self.run_more_spider('rack_hist')
+
+    def run_more_spider(self, name):
+        url = 'http://localhost:6800/schedule.json'
+        data = {
+                'project': 'rack',
+                'spider': name,
+                'setting': 'USER_ID=%s' % self.user_id
+                }
+        req = urllib2.Request(url, data)
+
+        try:
+            res = urllib2.urlopen(req)
+        except Exception, e:
+            log.msg("Cant start spider %s" % str(e))
+        return
 
     def close_spider(self, spider):
         rusage = []

@@ -27,6 +27,8 @@ class RackSpiderHistorical(RackSpiderBase):
         invoice_list = []
         invoice_data_list = []
         for id in invoice_ids:
+            if id in self.old_invoices:
+                continue
             url = self._URL_INVOICE + str(id)
             yield Request(url, callback=self._parse_invoice)
 

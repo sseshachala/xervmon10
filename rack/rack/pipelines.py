@@ -3,10 +3,11 @@
 import pymongo
 import csv
 import datetime
-from dateutil.relativedata import relativedata
+from dateutil.relativedelta import relativedelta
 import smtplib
 import StringIO
 import urllib2
+from urllib import urlencode
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
@@ -56,8 +57,8 @@ class StatusPipeline(object):
             e = ' \n'.join(spider.errors)
         else:
             status = 'Success'
-        self.email(status, cmd, e)
         self.log(status, cmd, e)
+        self.email(status, cmd, e)
 
     def log(self, status, cmd, error=''):
         now = datetime.datetime.now()
@@ -176,20 +177,28 @@ class MongoDBPipeline(object):
                 self.mongodb[RackServers._collection_name].find(
                     dict(
                         cloud_account_id=self.user_id,
-                        invoice_id={"$exists": True, "$ne": ""}
+                        invoice_id={"$exists": True, "$ne": ""},
+                        enddate={"$exists": True}
                     ))]
         spider.old_invoices = [i['invoice_id'] for i in old_invoices]
-        filtered_inv = sorted(old_invoices, key=lambda k: k['endtime'],
+        if spider.name != 'rack_current' or not spider.old_invoices:
+            return
+        filtered_inv = sorted(old_invoices, key=lambda k: k['enddate'],
                 reverse=True)
         try:
             last_inv = filtered_inv[0]
         except IndexError:
             last_inv = None
         now = datetime.datetime.now()
-        if last_inv and isinstance(type(last_inv['endtime']), now):
-            last_date = last_inv['endtime'] + relativedelta(months=+1)
+        if last_inv and isinstance(last_inv['enddate'], type(now)):
+            last_date = last_inv['enddate'] + relativedelta(months=+1)
             if last_date < now:
+                log.msg("Date of last invoce more than a month")
                 self.run_more_spider('rack_hist')
+            else:
+                log.msg('Date of last invoice less than a month')
+        else:
+            log.msg("No hist invoice with date")
 
     def run_more_spider(self, name):
         url = 'http://localhost:6800/schedule.json'
@@ -198,12 +207,14 @@ class MongoDBPipeline(object):
                 'spider': name,
                 'setting': 'USER_ID=%s' % self.user_id
                 }
-        req = urllib2.Request(url, data)
+        req = urllib2.Request(url, urlencode(data))
 
         try:
             res = urllib2.urlopen(req)
         except Exception, e:
             log.msg("Cant start spider %s" % str(e))
+        else:
+            log.msg("Run spider %s  with response %s" % (name, str(res.read())))
         return
 
     def close_spider(self, spider):

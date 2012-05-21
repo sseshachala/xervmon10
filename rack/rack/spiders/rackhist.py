@@ -28,6 +28,7 @@ class RackSpiderHistorical(RackSpiderBase):
         invoice_data_list = []
         for id in invoice_ids:
             if id in self.old_invoices:
+                self.log.msg("Found invoice id %s in db. Skip parsing" % id)
                 continue
             url = self._URL_INVOICE + str(id)
             yield Request(url, callback=self._parse_invoice)

@@ -96,6 +96,8 @@ class StatusPipeline(object):
 
 
 class MongoDBPipeline(object):
+    CURRENT_INVOICE = u'0000000000'
+
     def __init__(self):
         log.msg(settings.get('MONGO_HOST'))
         self.mongodb = MONGO_CONN[settings['MONGO_DB']]
@@ -161,6 +163,11 @@ class MongoDBPipeline(object):
     def close_spider(self, spider):
         if spider.close_down or not self.account_id or not self.user_id:
             return
+        if spider.name == 'softlayer_current':
+            self.mongodb[SoftlayerUsage._collection_name].remove(dict(cloud_account_id=self.user_id,
+                invoice_id=self.CURRENT_INVOICE))
+            self.mongodb[SoftlayerInvoice._collection_name].remove(dict(cloud_account_id=self.user_id,
+                invoice_id=self.CURRENT_INVOICE))
         self._write_to_mongo(self.sinvoices, SoftlayerInvoice._collection_name)
         self._write_to_mongo(self.susage, SoftlayerUsage._collection_name)
 

@@ -101,12 +101,9 @@ class MongoDBPipeline(object):
         self.mongodb = MONGO_CONN[settings['MONGO_DB']]
         self.user_id = settings.get('USER_ID')
         log.msg('User id is %s' % self.user_id)
-        self.rservers = []
-        self.rusage = []
+        self.sinvoices = []
+        self.susage = []
         # List of servers with info 
-        self.newserv = []
-        self.totalusagedata = []
-        self.totalusage = None
         self.account_id = None
         self.got_acid = False
         # From mongodb

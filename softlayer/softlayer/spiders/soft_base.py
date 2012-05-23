@@ -110,7 +110,6 @@ class SoftlayerSpiderBase(BaseSpider):
         if isinstance(invoice_date, type(now)):
             invoice['enddate'] = invoice_date
 
-        yield invoice
         details = workbook.sheet_by_name(detail_sheet)
         usage = []
         usage_entry = []
@@ -128,6 +127,7 @@ class SoftlayerSpiderBase(BaseSpider):
             usage_entry.append(details.row_values(row))
 
         invoice['cost'] = invoice_total
+        yield invoice
 
         def parse_row(row):
             spec = {}

@@ -46,7 +46,7 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
                 }
 
         yield FormRequest(self.FORM_URL, headers=headers,
-                formdata=data, callback=self.parse_page)
+                formdata=data, meta={'fdata': data}, callback=self.parse_page)
 
     def parse_page(self, response):
         resp = response
@@ -64,7 +64,7 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
             href = a['href'].strip()
             if href == '#':
                 href = ('/Administrative/accountSummarySL/tabView?' +
-                urllib.urlencode(response.request.formdata.update({'paginationOffset':
+                urllib.urlencode(response.request.meta['fdata'].update({'paginationOffset':
                     '0'})))
             self.log.msg(href)
             yield Request(urlparse.urljoin(self.FORM_URL, href), callback=self.parse_table)

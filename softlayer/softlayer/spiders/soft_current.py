@@ -32,7 +32,7 @@ class SoftlayerCurrentSpider(SoftlayerSpiderBase):
             if len(tds) < 8:
                 continue
             item = SoftlayerBandwidth()
-            item['server_name'] = tds[0].text
+            item['server_name'] = tds[0].text.lower()
             item['ip'] = tds[1].text
             item['allocated'] = tds[4].text
             item['bandwidth_current'] = tds[5].text

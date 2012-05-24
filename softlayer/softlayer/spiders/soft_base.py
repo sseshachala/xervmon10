@@ -138,7 +138,8 @@ class SoftlayerSpiderBase(BaseSpider):
             name = row[1]
             spl = name.split(':')
             spec['category'] = spl[0]
-            spec['name'] = ':'.join(spl[1:])
+            # server names displaying differently so lower it always
+            spec['name'] = ':'.join(spl[1:]).lower()
             spec['cost'] = row[8]
             spec['location'] = row[7]
             return spec

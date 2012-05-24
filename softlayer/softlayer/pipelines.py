@@ -149,12 +149,12 @@ class MongoDBPipeline(object):
             old_invoices = [i for i in
                 self.mongodb[SoftlayerInvoice._collection_name].find(
                     dict(
-                        cloud_account_id=self.user_id,
+                        cloud_account_id=str(self.user_id),
                         account_id=self.account_id,
                         invoice_id={"$exists": True, "$ne":
                             self.CURRENT_INVOICE}
                     ))]
-            spider.invoices = [i['invoice_id'] for i in old_invoices]
+            spider.invoices = [i[u'invoice_id'] for i in old_invoices]
             log.msg("Old invoices %s" % spider.invoices)
 
     def run_more_spider(self, name):

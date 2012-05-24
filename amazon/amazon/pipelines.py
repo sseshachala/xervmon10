@@ -175,7 +175,7 @@ class MongoDBPipeline(object):
             return (None, None, False)
         cred_type = user.credentail_type
         self.account_id = user.account_id
-        if cred_type == 'yes':
+        if cred_type == 'IAM':
             self.iam = True
         else:
             self.iam = False

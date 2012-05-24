@@ -1,5 +1,6 @@
 #!/usr/bin/env python import re
 import datetime
+import urllib
 import urlparse
 from BeautifulSoup import BeautifulSoup
 
@@ -62,8 +63,9 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
                 continue
             href = a['href'].strip()
             if href == '#':
-                yield Request(urlparse.urljoin(response.url, href), callback=self.parse_table)
-                continue
+                href = ('/Administrative/accountSummarySL/tabView?' +
+                urllib.urlencode(response.request.data.update({'paginationOffset':
+                    '0'})))
             self.log.msg(href)
             yield Request(urlparse.urljoin(self.FORM_URL, href), callback=self.parse_table)
 

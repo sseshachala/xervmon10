@@ -145,7 +145,7 @@ class MongoDBPipeline(object):
             return
         spider.username = u
         spider.password = p
-        if self.account_id:
+        if self.got_acid:
             old_invoices = [i for i in
                 self.mongodb[SoftlayerInvoice._collection_name].find(
                     dict(

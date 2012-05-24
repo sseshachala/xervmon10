@@ -47,18 +47,22 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
                 formdata=data, callback=self.parse_page)
 
     def parse_page(self, response):
-        soup = BeautifulSoup(response.body)
+        resp = response
+        soup = BeautifulSoup(resp.body)
         navdiv = soup.find('div',
                 id='administrative_account_summary_sl_tab_view_administrative_get_invoice_list_pagination_header_nav')
         try:
             navlinks = navdiv.findAll('a', 'paginationNavLink')
         except AttributeError:
             navlinks = []
+        self.parse_table(resp)
         self.log.msg("Additional links with invoices %s" % str(navlinks))
         for a in navlinks:
             if not a.has_key('href'):
                 continue
             href = a['href'].strip()
+            if href == '#':
+                continue
             self.log.msg(href)
             yield Request(urlparse.urljoin(self.FORM_URL, href), callback=self.parse_table)
 
@@ -75,6 +79,9 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
                     continue
                 # Invoices always is 10 digit length
                 invoice_num = href.split('/')[-2]
+                if not invoice_num.isdigit():
+                    self.log.msg("Skip invoice must be digit %s" % invoice_num)
+                    continue
                 invoice_num = (10 - len(invoice_num)) * '0' + invoice_num
                 if invoice_num in self.invoices:
                     self.log.msg("Skip parsing invoice already in db %s" %

@@ -192,6 +192,7 @@ class MongoDBPipeline(object):
 
     def _get_credentials(self):
         user = self.session.query(Users).filter_by(id=self.user_id).first()
+        self.account_id = user.account_id
         if user:
             return (user.account_user, user.password, user.account_id != "")
         else:

@@ -90,7 +90,11 @@ class SoftlayerSpiderBase(BaseSpider):
             idcell = summary.cell_value(12, 1)
             invoice_id = idcell.split()[-1]
         except IndexError:
-            return
+            try:
+                idcell = summary.cell_value(11, 1)
+                invoice_id = idcell.split()[-1]
+            except IndexError:
+                return
 
         invoice_date_t = summary.cell_value(1, 9)
         try:

@@ -194,6 +194,7 @@ class MongoDBPipeline(object):
                         if not isinstance(use['usage'], list):
                             use['usage'] = []
                         use['usage'].append(band.get_mongo_obj())
+                        break
 
         self._write_to_mongo(self.sinvoices, SoftlayerInvoice._collection_name)
         self._write_to_mongo(self.susage, SoftlayerUsage._collection_name)

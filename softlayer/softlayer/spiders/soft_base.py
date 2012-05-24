@@ -35,12 +35,12 @@ class SoftlayerSpiderBase(BaseSpider):
             raise CloseSpider('No credentials')
             return
         resp = response.replace(body=re.sub('<!DOCTYPE(.*)>', '', response.body))
-        return [FormRequest.from_response(resp, formname='loginform',
+        return FormRequest.from_response(resp, formname='loginform',
             formdata={
                 'data[User][username]':self.username,
                 'data[User][password]': self.password
                 },
-            callback=self.after_login)]
+            callback=self.after_login)
 
     def after_login(self, response):
         content = response.body

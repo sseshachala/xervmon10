@@ -28,12 +28,10 @@ class SoftlayerSpiderBase(BaseSpider):
     def parse(self, response):
         if self.close_down:
             raise CloseSpider('No user id')
-            return
         if not self.username or not self.password:
             self.close_down = True
             self.log.msg("No credentials", level=log.ERROR)
             raise CloseSpider('No credentials')
-            return
         resp = response.replace(body=re.sub('<!DOCTYPE(.*)>', '', response.body))
         return FormRequest.from_response(resp, formname='loginform',
             formdata={
@@ -54,18 +52,15 @@ class SoftlayerSpiderBase(BaseSpider):
         except:
             self.close_down =True
             raise CloseSpider('No account id')
-            return
         if error:
             self.log.msg("Error login")
             self.close_down = True
             raise CloseSpider("bad login")
-            return
         self.log.msg("Go to parsing")
         acid = soup.find("div", id="userinfo")
         if not acid:
             self.close_down = True
             raise CloseSpider("bad login")
-            return
         yield Request(self._BILLING_URL, dont_filter=True,
                 callback=self.parse_softlayer)
 
@@ -95,7 +90,7 @@ class SoftlayerSpiderBase(BaseSpider):
                 idcell = summary.cell_value(11, 1)
                 invoice_id = idcell.split()[-1]
             except IndexError:
-                return
+                raise
 
         invoice_date_t = summary.cell_value(1, 9)
         try:

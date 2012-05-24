@@ -198,7 +198,6 @@ class MongoDBPipeline(object):
             return (None, None, False)
 
     def _update_account_id(self):
-        return
         if not self.user_id or not self.account_id:
             return
         user = self.session.query(Users).filter_by(id=self.user_id).first()

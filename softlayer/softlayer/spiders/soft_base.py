@@ -155,7 +155,7 @@ class SoftlayerSpiderBase(BaseSpider):
                 item['spec'] = [parse_row(u[0])]
                 yield item
                 continue
-            item['name'] = u[0][1]
+            item['name'] = u[0][1].lower()
             item['spec'] = map(parse_row, u[1:])
             yield item
 

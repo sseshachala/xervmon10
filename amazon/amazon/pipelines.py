@@ -173,7 +173,7 @@ class MongoDBPipeline(object):
         user = self.session.query(Users).filter_by(id=self.user_id).first()
         if not user:
             return (None, None, False)
-        cred_type = user.credentail_type
+        cred_type = user.credential_type
         self.account_id = user.account_id
         if cred_type == 'IAM':
             self.iam = True

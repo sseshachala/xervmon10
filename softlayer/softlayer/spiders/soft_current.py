@@ -21,7 +21,7 @@ class SoftlayerCurrentSpider(SoftlayerSpiderBase):
     def parse_softlayer(self, response):
         """interface method for spider logic"""
         yield Request(self._URL_NEXT_INVOICE_XLS, callback=self._parse_invoice,
-                meta={'invoice_id': self.CURRENT_INVOICE)
+                meta={'invoice_id': self.CURRENT_INVOICE})
         yield Request(self._URL_BANDWIDTH, callback=self.parse_bandwidth)
 
     def parse_bandwidth(self, response):

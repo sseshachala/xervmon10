@@ -193,7 +193,7 @@ class MongoDBPipeline(object):
                     if band['server_name'] == use['name']:
                         if not isinstance(use['usage'], list):
                             use['usage'] = []
-                        use['usage'].append(band)
+                        use['usage'].append(band.get_mongo_obj())
 
         self._write_to_mongo(self.sinvoices, SoftlayerInvoice._collection_name)
         self._write_to_mongo(self.susage, SoftlayerUsage._collection_name)

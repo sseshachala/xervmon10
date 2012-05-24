@@ -35,13 +35,14 @@ class SoftlayerInvoice(MongoItem):
 class SoftlayerAccount(Item):
     account_id = Field()
 
-class SoftlayerBandwidth(Item):
-    server_name = Field()
-    bandwidth_current = Field()
-    bandwidth_projected = Field()
-    allocated = Field()
-    ip = Field()
-
+class SoftlayerBandwidth(MongoItem):
+    _mongo_keys = [
+            "server_name",
+            "bandwidth_current",
+            "bandwidth_projected",
+            "allocated",
+            "ip"
+            ]
 
 class SoftlayerUsage(MongoItem):
     _collection_name = "softlayer_data"

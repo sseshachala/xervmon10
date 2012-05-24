@@ -101,13 +101,14 @@ class MongoDBPipeline(object):
         log.msg('User id is %s' % self.user_id)
         self.acharges = []
         self.ausage = []
-        self.account_id = False
+        self.account_id = None
         self.old_usage = []
         self.old_charges = []
+        self.iam = False
         self.session = SESSION
 
     def process_item(self, item, spider):
-        if not self.account_id and isinstance(item, AmazonAccount):
+        if not self.got_acid and isinstance(item, AmazonAccount):
             self.account_id = item['account_id']
             self._update_account_id()
         elif isinstance(item, AmazonCharges):
@@ -127,8 +128,13 @@ class MongoDBPipeline(object):
             log.msg('No user id')
             spider.close_down = True
             return
-        u, p, self.account_id = self._get_credentials()
+
+        u, p, self.got_acid = self._get_credentials()
+        spider.iam = self.iam
         spider.user_id = self.user_id
+        spider.account_id = self.account_id
+        if spider.iam:
+            spider.start_urls = [spider.IAM_LOGIN_URL % self.account_id]
         fields = ['cloud_account_id', 'service', 'startdate', 'enddate']
         invcurs = self.mongodb[AmazonCharges._collection_name].find(dict(cloud_account_id=self.user_id))
         spider.invoices = []
@@ -152,7 +158,6 @@ class MongoDBPipeline(object):
             for it in self.ausage:
                 obj = it
                 self.mongodb[AmazonUsage._collection_name].update(dict([(o, obj[o]) for o in obj if o != 'usagevalue']), obj, upsert=True)
-            
         elif spider.name == 'aws_hist':
             self._write_to_mongo(self.ausage, AmazonUsage._collection_name)
             self._write_to_mongo(self.acharges, AmazonCharges._collection_name)
@@ -166,10 +171,15 @@ class MongoDBPipeline(object):
 
     def _get_credentials(self):
         user = self.session.query(Users).filter_by(id=self.user_id).first()
-        if user:
-            return (user.account_user, user.password, user.account_id != "")
-        else:
+        if not user:
             return (None, None, False)
+        cred_type = user.credentail_type
+        self.account_id = user.account_id
+        if cred_type == 'yes':
+            self.iam = True
+        else:
+            self.iam = False
+        return (user.account_user, user.password, user.account_id != "")
 
     def _update_account_id(self):
         return

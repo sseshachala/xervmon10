@@ -11,6 +11,7 @@ except ImportError:
 from scrapy.spider import BaseSpider
 from scrapy.http import FormRequest, Request
 from scrapy import log
+from scrapy.conf import settings
 from scrapy.exceptions import CloseSpider
 
 from BeautifulSoup import BeautifulSoup
@@ -18,6 +19,7 @@ from BeautifulSoup import BeautifulSoup
 from amazon.items import *
 
 class AwsSpiderBase(BaseSpider):
+    IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/console'
     _ACCOUNT_SUMMARY_URL = "https://aws-portal.amazon.com/gp/aws/developer/account/index.html?ie=UTF8&action=activity-summary"
     start_urls = [_ACCOUNT_SUMMARY_URL]
 

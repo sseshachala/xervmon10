@@ -55,14 +55,11 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
         except AttributeError:
             navlinks = []
         self.log.msg("Additional links with invoices %s" % str(navlinks))
-        self.parse_table(response)
         for a in navlinks:
             if not a.has_key('href'):
                 continue
             href = a['href'].strip()
             self.log.msg(href)
-            if href == '#':
-                continue
             yield Request(urlparse.urljoin(self.FORM_URL, href), callback=self.parse_table)
 
     def parse_table(self, response):

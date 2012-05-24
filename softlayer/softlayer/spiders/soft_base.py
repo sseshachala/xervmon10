@@ -87,7 +87,7 @@ class SoftlayerSpiderBase(BaseSpider):
             scells.append(summary.row_values(n))
 
         try:
-            idcell = summary.cell_value(11, 1)
+            idcell = summary.cell_value(12, 1)
             invoice_id = idcell.split()[-1]
         except IndexError:
             return
@@ -107,6 +107,7 @@ class SoftlayerSpiderBase(BaseSpider):
         invoice = SoftlayerInvoice()
         invoice['invoice_id'] = invoice_id
         invoice['enddate'] = ''
+        invoice['invoice_type'] = 'Recurring'
         if isinstance(invoice_date, type(now)):
             invoice['enddate'] = invoice_date
 

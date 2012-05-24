@@ -51,7 +51,9 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
         yield self.parse_table(response)
         navdiv = soup.find('div',
                 id='administrative_account_summary_sl_tab_view_administrative_get_invoice_list_pagination_header_nav')
-        navlinks = navdiv.findAll('a', 'paginationNavLink')
+        navlinks = []
+        if navdiv:
+            navlinks = navdiv.findAll('a', 'paginationNavLink')
         for a in navlinks:
             if not a.has_key('href'):
                 continue

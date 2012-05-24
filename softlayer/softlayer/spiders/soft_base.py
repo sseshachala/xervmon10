@@ -76,9 +76,11 @@ class SoftlayerSpiderBase(BaseSpider):
         now = datetime.datetime.now()
         contents = data.body
         workbook = xlrd.open_workbook(file_contents=contents)
-        detail_sheet = u'Detailed Billing'
+        detail_sheet = 'Detailed Billing'
         if (len(workbook.sheets()) < 2 or
           detail_sheet not in workbook.sheet_names()):
+            self.log.msg("Skip parsing invoce %s. Bad sheets %s" %
+                    (invoice_id, str(workbook.sheet_names())))
             return
         summary = workbook.sheet_by_index(0)
         scells = []

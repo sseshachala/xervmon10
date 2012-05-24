@@ -67,15 +67,18 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
         table = soup.find('table',
                 id='administrative_getinvoicelist_0')
         a_links = soup.findAll('a', href=lambda t: 'xls' in t)
+        self.log.msg("find invoice links %s" % str(a_links))
         for a in a_links:
             if a.has_key('href'):
                 href = a['href']
-                if not href or 'pending' in href.lower():
+                if not href or u'pending' in href.lower():
                     continue
                 # Invoices always is 10 digit length
                 invoice_num = href.split('/')[-2]
                 invoice_num = (10 - len(invoice_num)) * '0' + invoice_num
                 if invoice_num in self.invoices:
+                    self.log.msg("Skip parsing invoice already in db %s" %
+                            invoice_num)
                     continue
                 yield Request(urlparse.urljoin(self.FORM_URL, href),
                         callback=self._parse_invoice, meta={'invoice_id':

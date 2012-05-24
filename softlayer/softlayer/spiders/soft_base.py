@@ -155,5 +155,3 @@ class SoftlayerSpiderBase(BaseSpider):
             item['spec'] = map(parse_row, u[1:])
             yield item
 
-
-

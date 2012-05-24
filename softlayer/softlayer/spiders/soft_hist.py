@@ -20,6 +20,7 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
     def parse_softlayer(self, response):
         """interface method for spider logic"""
         soup = BeautifulSoup(response.body)
+        now = datetime.datetime.now()
         headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-Requested-With': 'XMLHttpRequest'
@@ -35,7 +36,7 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
                 'data[SearchFilter][2][data]': '03/10/2004',
                 'data[SearchFilter][2][method]': 'DATE_EXACT',
                 'data[SearchFilter][2][field]': 'CREATE_FROM_DATE',
-                'data[SearchFilter][3][data]': '05/23/2012', # now
+                'data[SearchFilter][3][data]': now.strftime('%m/%d/%Y'), # now
                 'data[SearchFilter][3][method]': 'DATE_EXACT',
                 'data[SearchFilter][3][field]': 'CREATE_TO_DATE',
                 'data[SearchFilter][4][data]': '',
@@ -68,10 +69,13 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
 
     def parse_table(self, response):
         soup = BeautifulSoup(response.body)
-        table = soup.find('table',
-                id='administrative_getinvoicelist_0')
-        a_links = soup.findAll('a', href=lambda t: 'xls' in t)
-        self.log.msg("find invoice links %s" % str(a_links))
+        div = soup.find('div',
+                id='administrative_account_summary_sl_tab_view_administrative_get_invoice_list_all_paginated_tables')
+        a_links = []
+        tables = div.findAll('table')
+        for t in tables:
+            a_links += soup.findAll('a', href=lambda t: 'xls' in t)
+        self.log.msg("find %d invoice links %s" % (len(a_links), str(a_links)))
         for a in a_links:
             if a.has_key('href'):
                 href = a['href']

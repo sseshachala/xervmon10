@@ -118,11 +118,14 @@ class MongoDBPipeline(object):
         if not self.account_id and isinstance(item, SoftlayerAccount):
             self.account_id = item['account_id']
             self._update_account_id()
+
         elif isinstance(item, SoftlayerInvoice):
             item['cloud_account_id'] = self.user_id
+            item['account_id'] = self.account_id
             obj = item.get_mongo_obj()
             self.sinvoices.append(obj)
         elif isinstance(item, SoftlayerUsage):
+            item['account_id'] = self.account_id
             item['cloud_account_id'] = self.user_id
             obj = item.get_mongo_obj()
             self.susage.append(obj)
@@ -142,6 +145,16 @@ class MongoDBPipeline(object):
             return
         spider.username = u
         spider.password = p
+        if self.account_id:
+            old_invoices = [i for i in
+                self.mongodb[SoftlayerInvoice._collection_name].find(
+                    dict(
+                        cloud_account_id=self.user_id,
+                        account_id=self.account_id,
+                        invoice_id={"$exists": True, "$ne":
+                            self.CURRENT_INVOICE}
+                    ))]
+            spider.old_invoices = [i['invoice_id'] for i in old_invoices]
 
     def run_more_spider(self, name):
         url = 'http://localhost:6800/schedule.json'

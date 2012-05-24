@@ -22,8 +22,6 @@ class SoftlayerSpiderBase(BaseSpider):
         self.close_down = False
         self.username = None
         self.password = None
-        self.username = 'ssudhendra'
-        self.password = '!Pipeline1'
         self.errors = []
         self.log = log
 
@@ -45,8 +43,17 @@ class SoftlayerSpiderBase(BaseSpider):
             callback=self.after_login)]
 
     def after_login(self, response):
-        soup = BeautifulSoup(response.body)
+        content = response.body
+        soup = BeautifulSoup(content)
         error = soup.find("span", "error_message")
+        try:
+            self.account_id = re.findall("'accountId', '([0-9]+)'", content)[0]
+            it = SoftlayerAccount()
+            it['account_id'] = self.account_id
+            yield it
+        except:
+            self.close_down =True
+            raise CloseSpider('No account id')
         if error:
             self.log.msg("Error login")
             self.close_down = True
@@ -71,11 +78,10 @@ class SoftlayerSpiderBase(BaseSpider):
         contents = data.body
         workbook = xlrd.open_workbook(file_contents=contents)
         detail_sheet = u'Detailed Billing'
-        summary_sheet = u'Summary'
-        if not all(map(lambda sh: sh in workbook.sheet_names(),
-            [detail_sheet, summary_sheet])):
+        if (len(workbook.sheets()) < 2 or
+          detail_sheet not in workbook.sheet_names()):
             return
-        summary = workbook.sheet_by_name(summary_sheet)
+        summary = workbook.sheet_by_index(0)
         scells = []
         for n in xrange(summary.nrows):
             scells.append(summary.row_values(n))
@@ -86,23 +92,17 @@ class SoftlayerSpiderBase(BaseSpider):
         except IndexError:
             return
 
-        if not self.account_id:
-            try:
-                acell = summary.cell_value(12, 1)
-                self.account_id = acell.split()[-1]
-                it = SoftlayerAccount()
-                it['account_id'] = self.account_id
-                yield it
-            except:
-                pass
-
         invoice_date_t = summary.cell_value(1, 9)
         try:
             invoice_date = datetime.datetime.strptime(
                     invoice_date_t, '%d %b %Y')
         except Exception, e:
-            self.log.msg(str(e))
-            invoice_date = None
+            try:
+                invoice_date = datetime.datetime.strptime(
+                    invoice_date_t, '%d %B %Y')
+            except Exception, e:
+                self.log.msg(str(e))
+                invoice_date = None
 
         invoice = SoftlayerInvoice()
         invoice['invoice_id'] = invoice_id

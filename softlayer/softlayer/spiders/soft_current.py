@@ -5,8 +5,6 @@ from scrapy.http import FormRequest, Request
 from scrapy import log
 from scrapy.exceptions import CloseSpider
 
-from BeautifulSoup import BeautifulSoup
-
 from softlayer.items import *
 from soft_base import SoftlayerSpiderBase
 

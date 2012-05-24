@@ -23,6 +23,7 @@ class SoftlayerInvoice(MongoItem):
     _collection_name = 'softlayer_invoices'
     _mongo_keys = [
             "cloud_account_id",
+            "account_id",
             "startdate",
             "enddate",
             "cost",
@@ -40,6 +41,7 @@ class SoftlayerUsage(MongoItem):
     _collection_name = "softlayer_data"
     _mongo_keys = [
             "cloud_account_id",
+            "account_id",
             "invoice_id",
             "name",
             "cost",

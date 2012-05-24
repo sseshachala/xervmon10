@@ -54,17 +54,18 @@ class SoftlayerSpiderBase(BaseSpider):
         except:
             self.close_down =True
             raise CloseSpider('No account id')
+            return
         if error:
             self.log.msg("Error login")
             self.close_down = True
             raise CloseSpider("bad login")
-            yield
+            return
         self.log.msg("Go to parsing")
         acid = soup.find("div", id="userinfo")
         if not acid:
             self.close_down = True
             raise CloseSpider("bad login")
-            yield
+            return
         yield Request(self._BILLING_URL, dont_filter=True,
                 callback=self.parse_softlayer)
 

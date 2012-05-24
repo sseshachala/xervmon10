@@ -33,7 +33,7 @@ SMTP_PORT = '587'
 MONGO_LOG = 'scrape_log'
 
 SPIDER_MIDDLEWARES = {
-        # 'softlayer.middlewares.ErrorsMiddleware': 100
+         'softlayer.middlewares.ErrorsMiddleware': 100
         }
 
 ITEM_PIPELINES = [

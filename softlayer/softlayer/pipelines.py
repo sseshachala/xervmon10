@@ -105,6 +105,7 @@ class MongoDBPipeline(object):
         log.msg('User id is %s' % self.user_id)
         self.sinvoices = []
         self.susage = []
+        self.sbandwidth = []
         # List of servers with info 
         self.account_id = None
         self.got_acid = False
@@ -124,6 +125,10 @@ class MongoDBPipeline(object):
             item['account_id'] = self.account_id
             obj = item.get_mongo_obj()
             self.sinvoices.append(obj)
+        elif isinstance(item, SoftlayerBandwidth):
+            if item['server_name']:
+                self.sbandwidth.append(item)
+
         elif isinstance(item, SoftlayerUsage):
             item['account_id'] = self.account_id
             item['cloud_account_id'] = self.user_id
@@ -178,10 +183,18 @@ class MongoDBPipeline(object):
         if spider.close_down or not self.account_id or not self.user_id:
             return
         if spider.name == 'softlayer_current':
-            self.mongodb[SoftlayerUsage._collection_name].remove(dict(cloud_account_id=self.user_id,
-                invoice_id=self.CURRENT_INVOICE))
-            self.mongodb[SoftlayerInvoice._collection_name].remove(dict(cloud_account_id=self.user_id,
-                invoice_id=self.CURRENT_INVOICE))
+            self.mongodb[SoftlayerUsage._collection_name].remove(
+                    dict(cloud_account_id=self.user_id, invoice_id=self.CURRENT_INVOICE))
+            self.mongodb[SoftlayerInvoice._collection_name].remove(
+                    dict(cloud_account_id=self.user_id, invoice_id=self.CURRENT_INVOICE))
+
+            for band in self.sbandwidth:
+                for use in self.susage:
+                    if band['server_name'] == use['name']:
+                        if not isinstance(use['usage'], list):
+                            use['usage'] = []
+                        use['usage'].append(band)
+
         self._write_to_mongo(self.sinvoices, SoftlayerInvoice._collection_name)
         self._write_to_mongo(self.susage, SoftlayerUsage._collection_name)
 

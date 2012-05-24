@@ -13,6 +13,7 @@ from softlayer.items import *
 
 class SoftlayerSpiderBase(BaseSpider):
     _BILLING_URL = "https://manage.softlayer.com/Administrative/accountSummary"
+    CURRENT_INVOICE = u'0000000000'
     start_urls = [_BILLING_URL]
 
     def __init__(self, *args, **kwargs):
@@ -70,6 +71,8 @@ class SoftlayerSpiderBase(BaseSpider):
 
     def _parse_invoice(self, data):
         "Parse xls invoice file"
+        meta = data.request.meta
+        invoice_id = meta['invoice_id']
         now = datetime.datetime.now()
         contents = data.body
         workbook = xlrd.open_workbook(file_contents=contents)
@@ -82,15 +85,6 @@ class SoftlayerSpiderBase(BaseSpider):
         for n in xrange(summary.nrows):
             scells.append(summary.row_values(n))
 
-        try:
-            idcell = summary.cell_value(12, 1)
-            invoice_id = idcell.split()[-1]
-        except IndexError:
-            try:
-                idcell = summary.cell_value(11, 1)
-                invoice_id = idcell.split()[-1]
-            except IndexError:
-                raise
 
         invoice_date_t = summary.cell_value(1, 9)
         try:

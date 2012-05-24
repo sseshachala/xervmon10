@@ -78,4 +78,5 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
                 if invoice_num in self.invoices:
                     continue
                 yield Request(urlparse.urljoin(self.FORM_URL, href),
-                        callback=self._parse_invoice)
+                        callback=self._parse_invoice, meta={'invoice_id':
+                            invoice_num})

@@ -29,7 +29,7 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
                 'data[SearchFilter][0][data]': '',
                 'data[SearchFilter][0][method]': 'EXACT',
                 'data[SearchFilter][0][field]': 'INVOICE_STATUS',
-                'data[SearchFilter][1][data]': '',
+                'data[SearchFilter][1][data]': 'RECURRING',
                 'data[SearchFilter][1][method]': 'EXACT',
                 'data[SearchFilter][1][field]': 'INVOICE_TYPE',
                 'data[SearchFilter][2][data]': '03/10/2004',

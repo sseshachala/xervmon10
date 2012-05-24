@@ -154,7 +154,7 @@ class MongoDBPipeline(object):
                         invoice_id={"$exists": True, "$ne":
                             self.CURRENT_INVOICE}
                     ))]
-            spider.old_invoices = [i['invoice_id'] for i in old_invoices]
+            spider.invoices = [i['invoice_id'] for i in old_invoices]
 
     def run_more_spider(self, name):
         url = 'http://localhost:6800/schedule.json'

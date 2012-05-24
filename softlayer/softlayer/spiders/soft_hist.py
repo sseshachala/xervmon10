@@ -54,6 +54,7 @@ class SoftlayerHistSpider(SoftlayerSpiderBase):
             navlinks = navdiv.findAll('a', 'paginationNavLink')
         except AttributeError:
             navlinks = []
+        self.log.msg("Additional links with invoices %s" % str(navlinks))
         yield self.parse_table(response)
         for a in navlinks:
             if not a.has_key('href'):

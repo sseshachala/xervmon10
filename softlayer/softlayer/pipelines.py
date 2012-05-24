@@ -190,7 +190,7 @@ class MongoDBPipeline(object):
 
             for band in self.sbandwidth:
                 for use in self.susage:
-                    if band['server_name'] == use['name']:
+                    if band['server_name'] in use['name']:
                         if not isinstance(use['usage'], list):
                             use['usage'] = []
                         use['usage'].append(band.get_mongo_obj())

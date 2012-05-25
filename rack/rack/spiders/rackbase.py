@@ -7,6 +7,7 @@ from BeautifulSoup import BeautifulSoup
 from scrapy.spider import BaseSpider
 from scrapy.http import FormRequest, Request
 from scrapy import log
+from scrapy.conf import settings
 from scrapy.exceptions import CloseSpider
 
 from rack.items import *

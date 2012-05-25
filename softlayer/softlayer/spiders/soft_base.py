@@ -115,6 +115,9 @@ class SoftlayerSpiderBase(BaseSpider):
             cell = lambda col: details.cell_value(row, col - 1)
             if cell(2) == u'Total:':
                 invoice_total = cell(9)
+                if usage_entry:
+                    usage.append(usage_entry)
+                    usage_entry = []
                 break
             if not cell(2):
                 if usage_entry:

@@ -15,8 +15,6 @@ from soft_base import SoftlayerSpiderBase
 
 class SoftlayerHistSpider(SoftlayerSpiderBase):
     name = 'softlayer_hist'
-    FORM_URL = (
-    'https://manage.softlayer.com/Administrative/accountSummarySL/tabView')
 
     def parse_softlayer(self, response):
         """interface method for spider logic"""

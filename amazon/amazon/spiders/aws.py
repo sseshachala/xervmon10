@@ -19,8 +19,9 @@ from BeautifulSoup import BeautifulSoup
 from amazon.items import *
 
 class AwsSpiderBase(BaseSpider):
-    IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/console'
-    _ACCOUNT_SUMMARY_URL = "https://aws-portal.amazon.com/gp/aws/developer/account/index.html?ie=UTF8&action=activity-summary"
+    _urls = settings.get('URLS')
+    if isinstance(_urls, dict):
+        vars().update(_urls)
     start_urls = [_ACCOUNT_SUMMARY_URL]
 
     def __init__(self, *args, **kwargs):

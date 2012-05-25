@@ -43,4 +43,12 @@ ITEM_PIPELINES = [
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
 }
+URLS = dict(
+    _BILLING_URL = "https://manage.softlayer.com/Administrative/accountSummary",
 
+    _URL_NEXT_INVOICE = "https://manage.softlayer.com/Administrative/showNextInvoice",
+    _URL_NEXT_INVOICE_XLS = "https://manage.softlayer.com/Administrative/showNextInvoice/xls",
+    FORM_URL = (
+    'https://manage.softlayer.com/Administrative/accountSummarySL/tabView'),
+    _URL_BANDWIDTH = 'https://manage.softlayer.com/PublicNetwork/bandwidth'
+)

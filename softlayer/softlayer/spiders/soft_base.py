@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-import re
-import datetime
+import re import datetime
 from scrapy.spider import BaseSpider
 from scrapy.http import FormRequest, Request
 from scrapy import log
 from scrapy.exceptions import CloseSpider
+from scrapy.conf import settings
 
 from BeautifulSoup import BeautifulSoup
 import xlrd
@@ -12,7 +12,9 @@ import xlrd
 from softlayer.items import *
 
 class SoftlayerSpiderBase(BaseSpider):
-    _BILLING_URL = "https://manage.softlayer.com/Administrative/accountSummary"
+    _urls = settings.get('URLS')
+    if isinstance(_urls, dict):
+        vars().update(_urls)
     CURRENT_INVOICE = u'0000000000'
     start_urls = [_BILLING_URL]
 

@@ -13,10 +13,6 @@ from soft_base import SoftlayerSpiderBase
 class SoftlayerCurrentSpider(SoftlayerSpiderBase):
     name = 'softlayer_current'
 
-    _URL_NEXT_INVOICE = "https://manage.softlayer.com/Administrative/showNextInvoice"
-    _URL_NEXT_INVOICE_XLS = "https://manage.softlayer.com/Administrative/showNextInvoice/xls"
-    _URL_BANDWIDTH = 'https://manage.softlayer.com/PublicNetwork/bandwidth'
-
 
     def parse_softlayer(self, response):
         """interface method for spider logic"""

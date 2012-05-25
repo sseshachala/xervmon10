@@ -68,6 +68,8 @@ class AwsSpiderBase(BaseSpider):
             account = AmazonAccount()
             account['account_id'] = m.group(1)
             yield account
+        elif self.iam:
+            pass
         else:
             self.close_down = True
             raise CloseSpider("bad login")

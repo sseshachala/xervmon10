@@ -135,6 +135,7 @@ class MongoDBPipeline(object):
         spider.account_id = self.account_id
         if spider.iam:
             spider.start_urls = [spider.IAM_LOGIN_URL % self.account_id]
+            log.msg("IAM mode with starturl %s" % str(spider.start_urls))
         fields = ['cloud_account_id', 'service', 'startdate', 'enddate']
         invcurs = self.mongodb[AmazonCharges._collection_name].find(dict(cloud_account_id=self.user_id))
         spider.invoices = []

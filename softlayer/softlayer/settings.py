@@ -27,7 +27,6 @@ USER_ID = None
 SENDER_EMAIL = 'sysadmin@hooduku.com'
 SENDER_PASSWORD = 'admin9873%man'
 RECEIVER_EMAIL = 'sudhi@hooduku.com'
-RECEIVER_EMAIL = 'snoopt@yandex.ru'
 SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = '587'
 MONGO_LOG = 'scrape_log'

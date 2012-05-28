@@ -50,8 +50,8 @@ class StatusPipeline(object):
             e = ' \n'.join(spider.errors)
         else:
             status = 'Success'
-#        self.email(status, cmd, e)
         self.log(status, cmd, e)
+        self.email(status, cmd, e)
 
     def log(self, status, cmd, error=''):
         now = datetime.datetime.now()

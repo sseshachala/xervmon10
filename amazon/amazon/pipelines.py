@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pymongo
+import smtplib
 import csv
 import datetime
 import StringIO

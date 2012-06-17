@@ -22,8 +22,10 @@ class AttSpiderBase(BaseSpider):
         'https://www.att.com/olam/loginAction.olamexecute?customerType=W')
     _DETAIL_URL = (
         'https://www.att.com/olam/passthroughAction.myworld?actionType=ViewBillDetails')
-    _LOGIN_SUBMIT_URL = (
-        'https://myattdx15.att.com/commonLogin/igate_wam/multiLogin.do')
+    _BILLS_URL = (
+            'https://www.att.com/olam/passthroughAction.myworld?actionType=ViewBillHistory')
+    _LAST_BILL_URL = (
+            'https://www.att.com/view/billSummary.doview')
     start_urls = [_LOGIN_URL]
 
     def __init__(self, *args, **kwargs):
@@ -61,32 +63,25 @@ class AttSpiderBase(BaseSpider):
             self.close_down = True
             self.log.msg("No credentials", level=log.ERROR)
             raise CloseSpider('No credentials')
-        return Request(self._DETAIL_URL, cookies=br_cookies,
+        return Request(self._BILLS_URL, cookies=br_cookies,
                 callback=self.after_login)
 
     def after_login(self, response):
         content = response.body
-        self.log.msg(content)
         soup = BeautifulSoup(content)
+        with open('bills.html', 'w') as fp:
+            fp.write(soup.prettify())
         try:
-            div = soup.find('div', id='dbUserName')
+            div = soup.find('li', 'account-number')
             it = AttAccount()
             it['account_id'] = div.text
             yield it
         except:
             self.close_down =True
             raise CloseSpider('No account id')
-        if error:
-            self.log.msg("Error login")
-            self.close_down = True
-            raise CloseSpider("bad login")
         self.log.msg("Go to parsing")
-        acid = div
-        if not acid:
-            self.close_down = True
-            raise CloseSpider("bad login")
-        yield Request(self._BILLING_URL, dont_filter=True,
-                callback=self.parse_softlayer)
+        yield Request(self._LAST_BILL_URL, cookies=response.request.cookies, dont_filter=True,
+                callback=self.parse_att)
 
     def parse_att(self, response):
         """interface method for spider logic"""

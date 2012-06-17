@@ -1,4 +1,5 @@
-#!/usr/bin/env python import re
+#!/usr/bin/env python 
+import re
 import datetime
 from scrapy.spider import BaseSpider
 from scrapy.http import FormRequest, Request

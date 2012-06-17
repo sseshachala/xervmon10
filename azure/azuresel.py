@@ -108,7 +108,6 @@ def parse_csv(filename):
     return items
 
 
-
 def update_usage():
     pass
 
@@ -142,7 +141,7 @@ if __name__ == "__main__":
             e = traceback.format_exc()
             print str(e)
             log(uid, 'Error', e)
-	    browser.close()
+            browser.close()
         else:
             log(uid, 'Success')
 

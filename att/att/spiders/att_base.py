@@ -45,6 +45,7 @@ class AttSpiderBase(BaseSpider):
         browser = webdriver.Firefox()
         browser.get(self._LOGIN_URL)
         browser.find_element_by_name('userid').send_keys(self.username)
+        browser.find_element_by_id('passwordTextField').click()
         browser.find_element_by_name('password').send_keys(self.password)
         browser.find_element_by_name('password').submit()
         cookies = browser.get_cookies()

@@ -29,9 +29,8 @@ class AttBill(MongoItem):
             "account_id",
             "startdate",
             "enddate",
-            "name",
-            "nums",
-            "charges",
+            "service_accounts",
+            "account_charges",
             "totalcost"
             ]
 

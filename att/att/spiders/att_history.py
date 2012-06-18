@@ -24,7 +24,6 @@ class AttHistorySpider(AttSpiderBase):
             fp.write(soup.prettify())
         links = [urlparse.urljoin(self._BASE_URL, a['href']) for a  in
                 soup.findAll('a', href=re.compile('billSummary'))]
-        self.log.msg(str(links) + 'LINKS!!!!!!!!!')
         for link in links:
             yield Request(link, cookies=response.request.cookies,
                     callback=self.parse_bill)
@@ -38,6 +37,9 @@ class AttHistorySpider(AttSpiderBase):
         frraw, toraw = map(lambda x: x.strip(), periodraw.split('-'))
         dformat = '%B %d, %Y'
         bill['startdate'] = datetime.datetime.strptime(frraw, dformat)
+        if bill['startdate'] in self.invoices:
+            self.log.msg('Invoice already in db. Skipping...')
+            yield
         bill['enddate'] = datetime.datetime.strptime(toraw, dformat)
         blocks = soup.findAll('div', 'rel box')
         bill['nums'] = {}
@@ -78,18 +80,20 @@ class AttHistorySpider(AttSpiderBase):
             services = []
             for table in tables[:-1]:
                 service = {}
-                namediv = table.findPrevious('div', 'MarLeft25').findPreviousSibling('div')
-                name, charge = map(lambda t: t.text, namediv.findAll('b'))
+                namediv = table.findPrevious('div', 'toggleHidden').findPreviousSibling('div')
+                name = namediv.find('a').text
+                charge = namediv.find('span', 'amount').text
                 if not table.tbody:
                     continue
                 trs = table.tbody.findAll('tr')
                 service['usage'] = []
                 for tr in trs:
                     us = {}
-                    if len(tr('td')) < 3:
+                    if len(tr('td')) < 2:
                         continue
                     us['info'] = tr.td.text
-                    us['info2'] = tr('td')[1].text
+                    If len(tr('td')) > 2:
+                        us['info2'] = tr('td')[1].text
                     us['cost'] = tr('td')[-1].text
                     service['usage'].append(us)
                 service['name'] = name

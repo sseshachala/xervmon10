@@ -96,7 +96,6 @@ class StatusPipeline(object):
 
 
 class MongoDBPipeline(object):
-
     def __init__(self):
         self.mongodb = MONGO_CONN[settings['MONGO_DB']]
         self.user_id = settings.get('USER_ID')
@@ -106,8 +105,7 @@ class MongoDBPipeline(object):
         self.got_acid = False
         # From mongodb
         self.sbills = []
-        self.old_usage = []
-        self.old_invoices = []
+        self.old_bills = []
         # sqlalchemy session
         self.session = SESSION
 
@@ -139,13 +137,13 @@ class MongoDBPipeline(object):
         spider.username = u
         spider.password = p
         if self.got_acid:
-            old_invoices = [i for i in
+            old_bills = [i for i in
                 self.mongodb[AttBill._collection_name].find(
                     dict(
                         cloud_account_id=str(self.user_id),
                         account_id=self.account_id
                     ))]
-            spider.invoices = [i[u'invoice_id'] for i in old_invoices]
+            spider.invoices = [i[u'startdate'] for i in old_invoices]
             log.msg("Old invoices %s" % spider.invoices)
 
     def run_more_spider(self, name):

@@ -22,7 +22,7 @@ class MongoItem(Item):
 class AttAccount(Item):
     account_id = Field()
 
-class AttUsage(MongoItem):
+class AttBill(MongoItem):
     _collection_name = "att_data"
     _mongo_keys = [
             "cloud_account_id",
@@ -30,8 +30,8 @@ class AttUsage(MongoItem):
             "startdate",
             "enddate",
             "name",
-            "number",
-            "value",
-            "cost"
+            "nums",
+            "charges",
+            "totalcost"
             ]
 

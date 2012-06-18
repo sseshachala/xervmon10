@@ -18,6 +18,7 @@ class AttSpiderBase(BaseSpider):
     if isinstance(_urls, dict):
         vars().update(_urls)
 
+    _BASE_URL = ('https://www.att.com/')
     _LOGIN_URL = (
         'https://www.att.com/olam/loginAction.olamexecute?customerType=W')
     _DETAIL_URL = (
@@ -80,7 +81,7 @@ class AttSpiderBase(BaseSpider):
             self.close_down =True
             raise CloseSpider('No account id')
         self.log.msg("Go to parsing")
-        yield Request(self._LAST_BILL_URL, cookies=response.request.cookies, dont_filter=True,
+        yield Request(self._BILLS_URL, cookies=response.request.cookies, dont_filter=True,
                 callback=self.parse_att)
 
     def parse_att(self, response):

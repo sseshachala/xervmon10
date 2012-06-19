@@ -136,6 +136,7 @@ class MongoDBPipeline(object):
             return
         spider.username = u
         spider.password = p
+        now = datetime.datetime.now()
         if self.got_acid:
             old_bills = [i for i in
                 self.mongodb[AttBill._collection_name].find(
@@ -143,7 +144,7 @@ class MongoDBPipeline(object):
                         cloud_account_id=str(self.user_id),
                         account_id=self.account_id
                     ))]
-            spider.invoices = [i[u'startdate'] for i in old_bills]
+            spider.invoices = [i[u'enddate'].strftime('%Y%m%d') for i in old_bills if isinstance(i[u'enddate'], type(now))]
             log.msg("Old invoices %s" % spider.invoices)
 
     def run_more_spider(self, name):

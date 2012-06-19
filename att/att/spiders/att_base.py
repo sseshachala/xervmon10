@@ -18,15 +18,6 @@ class AttSpiderBase(BaseSpider):
     if isinstance(_urls, dict):
         vars().update(_urls)
 
-    _BASE_URL = ('https://www.att.com/')
-    _LOGIN_URL = (
-        'https://www.att.com/olam/loginAction.olamexecute?customerType=W')
-    _DETAIL_URL = (
-        'https://www.att.com/olam/passthroughAction.myworld?actionType=ViewBillDetails')
-    _BILLS_URL = (
-            'https://www.att.com/olam/passthroughAction.myworld?actionType=ViewBillHistory')
-    _LAST_BILL_URL = (
-            'https://www.att.com/view/billSummary.doview')
     start_urls = [_LOGIN_URL]
 
     def __init__(self, *args, **kwargs):
@@ -36,8 +27,6 @@ class AttSpiderBase(BaseSpider):
         self.close_down = False
         self.username = None
         self.password = None
-        self.username = '4082039960'
-        self.password = 'Java0man'
         self.errors = []
         self.log = log
 

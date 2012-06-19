@@ -28,7 +28,6 @@ USER_ID = None
 SENDER_EMAIL = 'sysadmin@hooduku.com'
 SENDER_PASSWORD = 'admin9873%man'
 RECEIVER_EMAIL = 'sudhi@hooduku.com'
-RECEIVER_EMAIL = 'snoopt@yandex.ru'
 SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = '587'
 MONGO_LOG = 'scrape_log'
@@ -40,3 +39,14 @@ ITEM_PIPELINES = [
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
 }
+URLS = dict(
+    _BASE_URL = ('https://www.att.com/'),
+    _LOGIN_URL = (
+        'https://www.att.com/olam/loginAction.olamexecute?customerType=W'),
+    _DETAIL_URL = (
+        'https://www.att.com/olam/passthroughAction.myworld?actionType=ViewBillDetails'),
+    _BILLS_URL = (
+            'https://www.att.com/olam/passthroughAction.myworld?actionType=ViewBillHistory'),
+    _LAST_BILL_URL = (
+            'https://www.att.com/view/billSummary.doview')
+    )

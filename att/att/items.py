@@ -31,6 +31,8 @@ class AttBill(MongoItem):
             "enddate",
             "service_accounts",
             "account_charges",
-            "totalcost"
+            "prior_activity",
+            "total_charges",
+            "total_amount"
             ]
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 import re
 import datetime
+from dateutil.relativedelta import relativedelta
 import urlparse
 
 from scrapy.spider import BaseSpider
@@ -32,22 +33,30 @@ class AttHistorySpider(AttSpiderBase):
     def parse_bill(self, response):
         soup = BeautifulSoup(response.body.replace('&nbsp;',''))
         bill = AttBill()
-        periodsel = soup.find('select', {'name': 'stmtID'})
-        periodraw = periodsel.find('option', {'selected': 'selected'}).text
-        frraw, toraw = map(lambda x: x.strip(), periodraw.split('-'))
-        dformat = '%B %d, %Y'
-        bill['startdate'] = datetime.datetime.strptime(frraw, dformat)
-        if bill['startdate'] in self.invoices:
+        try:
+            enddate = re.findall('stmtID=([0-9]{8})\|', response.url)[0]
+        except:
+            raise
+            return
+        self.log.msg(enddate)
+        if not enddate:
+            return
+        bill['enddate'] = datetime.datetime.strptime(enddate, '%Y%m%d')
+        if enddate in self.invoices:
             self.log.msg('Invoice already in db. Skipping...')
-            # yield
-        bill['enddate'] = datetime.datetime.strptime(toraw, dformat)
+            return
+        else:
+            self.invoices.append(enddate)
+        bill['startdate'] = bill['enddate'] + relativedelta(months=-1, days=+1)
         bill['service_accounts'] = {}
         bill['account_charges'] = {}
         nums_old = soup.findAll('div', 'curvyRedraw') 
         if nums_old:
-            self.parse_old(soup, bill)
+            bill = self.parse_old(soup, bill)
         else:
-            self.parse_cur(soup, bill)
+            bill = self.parse_cur(soup, bill)
+        yield bill
+
         
 
     def parse_old(self, soup, bill):
@@ -67,9 +76,12 @@ class AttHistorySpider(AttSpiderBase):
                 if not trs:
                     continue
                 service = {}
-                namediv = table.findPrevious('div', 'w100per').findPreviousSibling('div')
-                name = namediv.find('a').text
-                charge = namediv.find('span', text=lambda t:'$' in t).text
+                namediv = table.findPrevious('h4', 'rel')
+                if namediv:
+                    name = namediv.find('a').text
+                    charge = namediv.find('span', text=re.compile('["$"]+'))
+                    service['name'] = name
+                    service['total'] = charge
                 service['usage'] = []
                 for tr in trs:
                     us = {}
@@ -77,17 +89,27 @@ class AttHistorySpider(AttSpiderBase):
                         continue
                     us['info'] = tr.td.text
                     if len(tr('td')) > 2:
-                        us['info2'] = '; '.join(map(lambda t: t.text, tr('td')[1:-1]))
+                        us['info2'] = ''
+                        for t in tr('td')[1:-1]:
+                            tex = t.text.strip()
+                            if tex:
+                                us['info2'] += tex + '; '
+
                     us['cost'] = tr('td')[-1].text
                     service['usage'].append(us)
-                service['name'] = name
-                service['total'] = charge
                 services.append(service)
             numu['services'] = services
             number_usage.append(numu)
         bill['service_accounts'] = number_usage
 
-        yield bill
+        prioract = soup.find(lambda tag: 'Prior Activity' in tag.text and tag.name == 'a')
+        bill['prior_activity'] = prioract.findNext('span').text
+        totalch = soup.find(lambda tag: 'Total Charges This' in tag.text and tag.name == 'a')
+        bill['total_charges'] = totalch.findNext('span').text
+        totalam = soup.find(lambda tag: 'Total Amount Due' in tag.text and tag.name == 'strong')
+        bill['total_amount'] = totalam.findNext('td').text
+
+        return bill
 
 
 
@@ -155,4 +177,12 @@ class AttHistorySpider(AttSpiderBase):
             number_usage.append(numu)
         bill['service_accounts'] = number_usage
 
-        yield bill
+        prioract = soup.find(lambda tag: 'Prior Activity' in tag.text and tag.name == 'span')
+        bill['prior_activity'] = prioract.findNext('span').text
+        totalch = soup.find(lambda tag: 'New Charges' in tag.text and tag.name == 'td')
+        bill['total_charges'] = totalch.findNext('td').text
+        totalam = soup.find(lambda tag: 'Total Amount Due' in tag.text and tag.name == 'strong')
+        bill['total_amount'] = totalam.findNext(lambda tag: tag.name =='td' and '$' in tag.text).text
+
+
+        return bill

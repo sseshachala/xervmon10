@@ -180,7 +180,7 @@ class AttHistorySpider(AttSpiderBase):
         prioract = soup.find(lambda tag: 'Prior Activity' in tag.text and tag.name == 'span')
         bill['prior_activity'] = prioract.findNext('span').text
         totalch = soup.find(lambda tag: 'New Charges' in tag.text and tag.name == 'td')
-        bill['total_charges'] = totalch.findNext('td').text
+        bill['total_charges'] = totalch.findNext(lambda tag: tag.name =='td' and '$' in tag.text).text
         totalam = soup.find(lambda tag: 'Total Amount Due' in tag.text and tag.name == 'strong')
         bill['total_amount'] = totalam.findNext(lambda tag: tag.name =='td' and '$' in tag.text).text
 

@@ -11,7 +11,9 @@ BOT_VERSION = '1.0'
 
 SPIDER_MODULES = ['att.spiders']
 NEWSPIDER_MODULE = 'att.spiders'
-USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
+USER_AGENT = '''Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19'''
+
+DOWNLOAD_DELAY = 1
 
 
 MONGO_DB = 'xervmon_remote'

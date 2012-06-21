@@ -137,6 +137,7 @@ class MongoDBPipeline(object):
         spider.username = u
         spider.password = p
         now = datetime.datetime.now()
+        self.ensure_index(AttBill)
         if self.got_acid:
             old_bills = [i for i in
                 self.mongodb[AttBill._collection_name].find(
@@ -146,6 +147,12 @@ class MongoDBPipeline(object):
                     ))]
             spider.invoices = [i[u'enddate'].strftime('%Y%m%d') for i in old_bills if isinstance(i[u'enddate'], type(now))]
             log.msg("Old invoices %s" % spider.invoices)
+
+    def ensure_index(self, Item):
+        if not hasattr(Item, _mongo_keys):
+            return
+        for i in Item._mongo_keys:
+            self.mongodb[Item._collection_name].ensure_index(i)
 
     def run_more_spider(self, name):
         url = 'http://localhost:6800/schedule.json'

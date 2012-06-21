@@ -149,8 +149,8 @@ class MongoDBPipeline(object):
             log.msg("Old invoices %s" % spider.invoices)
 
     def ensure_index(self, Item):
-        if not hasattr(Item, _mongo_keys) or not hasattr(Item,
-                _collection_name):
+        if not hasattr(Item, '_mongo_keys') or not hasattr(Item,
+                '_collection_name'):
             return
         for i in Item._mongo_keys:
             self.mongodb[Item._collection_name].ensure_index(i)

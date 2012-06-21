@@ -71,7 +71,7 @@ class RackServers(RackItem):
     usage = Field()
     startdate = Field()
     enddate = Field()
-    c ost = Field()
+    cost = Field()
 
 class RackTotalUsage(RackServers):
     pass

@@ -4,11 +4,11 @@ class RackAccount(Item):
     account_id = Field()
 
 class RackItem(Item):
-    mongo_keys = []
+    _mongo_keys = []
 
     def get_mongo_obj(self, all_fields=False):
         it = {}
-        mongo_keys = self.mongo_keys
+        mongo_keys = self._mongo_keys
         if all_fields:
             mongo_keys = self.keys()
         for i in mongo_keys:
@@ -17,7 +17,7 @@ class RackItem(Item):
 
 
 class RackServerInfo(RackItem):
-    mongo_keys = ["name", "ip", "id"]
+    _mongo_keys = ["name", "ip", "id"]
     name = Field()
     ip = Field()
     id = Field()
@@ -26,7 +26,7 @@ class RackServerInfo(RackItem):
 class RackUsage(RackItem):
     _collection_name = "rackdata"
     enddate = Field()
-    mongo_keys = [
+    _mongo_keys = [
             "cloud_account_id",
             "account_id",
             "usagetype",
@@ -53,7 +53,7 @@ class RackUsage(RackItem):
 
 class RackServers(RackItem):
     _collection_name = "rackservers"
-    mongo_keys = [
+    _mongo_keys = [
             "cloud_account_id",
             "account_id",
             "invoice_id",
@@ -71,7 +71,7 @@ class RackServers(RackItem):
     usage = Field()
     startdate = Field()
     enddate = Field()
-    cost = Field()
+    c ost = Field()
 
 class RackTotalUsage(RackServers):
     pass

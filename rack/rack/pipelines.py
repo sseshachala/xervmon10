@@ -173,6 +173,8 @@ class MongoDBPipeline(object):
             return
         spider.username = u
         spider.password = p
+        self.ensure_index(RackUsage)
+        self.ensure_index(RackServers)
         old_invoices = [i for i in
                 self.mongodb[RackServers._collection_name].find(
                     dict(
@@ -264,6 +266,12 @@ class MongoDBPipeline(object):
             self._write_to_mongo(rackinv, RackServers._collection_name)
             self._write_to_mongo(rackusage, RackUsage._collection_name)
 
+    def ensure_index(self, Item):
+        if not hasattr(Item, _mongo_keys) or not hasattr(Item,
+                _collection_name):
+            return
+        for i in Item._mongo_keys:
+            self.mongodb[Item._collection_name].ensure_index(i)
 
 
 

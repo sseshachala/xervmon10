@@ -150,6 +150,8 @@ class MongoDBPipeline(object):
             return
         spider.username = u
         spider.password = p
+        self.ensure_index(SoftlayerInvoice)
+        self.ensure_index(SoftlayerUsage)
         if self.got_acid:
             old_invoices = [i for i in
                 self.mongodb[SoftlayerInvoice._collection_name].find(
@@ -178,6 +180,13 @@ class MongoDBPipeline(object):
         else:
             log.msg("Run spider %s  with response %s" % (name, str(res.read())))
         return
+
+    def ensure_index(self, Item):
+        if not hasattr(Item, _mongo_keys) or not hasattr(Item,
+                _collection_name):
+            return
+        for i in Item._mongo_keys:
+            self.mongodb[Item._collection_name].ensure_index(i)
 
     def close_spider(self, spider):
         if spider.close_down or not self.account_id or not self.user_id:

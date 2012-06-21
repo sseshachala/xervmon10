@@ -138,6 +138,8 @@ class MongoDBPipeline(object):
             spider.start_urls = [spider.IAM_LOGIN_URL % self.account_id]
             log.msg("IAM mode with starturl %s" % str(spider.start_urls))
         fields = ['cloud_account_id', 'service', 'startdate', 'enddate']
+        self.ensure_index(AmazonCharges)
+        self.ensure_index(AmazonUsage)
         invcurs = self.mongodb[AmazonCharges._collection_name].find(dict(cloud_account_id=self.user_id))
         spider.invoices = []
         for inv in invcurs:
@@ -170,6 +172,12 @@ class MongoDBPipeline(object):
             return
         self.mongodb[col].insert(bulk)
 
+    def ensure_index(self, Item):
+        if not hasattr(Item, _mongo_keys) or not hasattr(Item,
+                _collection_name):
+            return
+        for i in Item._mongo_keys:
+            self.mongodb[Item._collection_name].ensure_index(i)
 
     def _get_credentials(self):
         user = self.session.query(Users).filter_by(id=self.user_id).first()

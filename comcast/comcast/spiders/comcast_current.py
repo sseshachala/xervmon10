@@ -21,6 +21,7 @@ class ComcastCurrentSpider(ComcastSpiderBase):
         soup = BeautifulSoup(source)
         block = soup.find('div', 'bill_details_container')
         if not block:
+            self.log.msg("No block found")
             return
         item = ComcastCurrent()
         dates = block.find('span',
@@ -48,5 +49,6 @@ class ComcastCurrentSpider(ComcastSpiderBase):
             results[n] = amount
         item['bill'] = results
         item['total'] = results['Total bill']
+        self.log.msg(item)
         return item
 

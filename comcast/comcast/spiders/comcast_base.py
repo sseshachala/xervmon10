@@ -65,6 +65,8 @@ class ComcastSpiderBase(BaseSpider):
                 if status == 'ERROR':
                     raise CloseSpider("Couldnt solve captcha. Error: %s" % captext)
                     return
+            else:
+                self.log.msg("No Captcha found")
 
             browser.find_element_by_name('passwd').submit()
             while True:
@@ -82,7 +84,7 @@ class ComcastSpiderBase(BaseSpider):
                 self.log.msg(div.text)
             else:
                 self.log.msg("No account block text")
-            self.parse_comcast(browser)
+            yield self.parse_comcast(browser)
         except:
             raise
         finally:

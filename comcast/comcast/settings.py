@@ -29,9 +29,18 @@ USER_ID = None
 
 SENDER_EMAIL = 'sysadmin@hooduku.com'
 SENDER_PASSWORD = 'admin9873%man'
-RECEIVER_EMAIL = 'sudhi@hooduku.com'
+RECEIVER_EMAIL = 'snoopt@yandex.ru'
 SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = '587'
+
+ITEM_PIPELINES = [
+        'comcast.pipelines.MongoDBPipeline',
+        'comcast.pipelines.StatusPipeline'
+        ]
+EXTENSIONS = {
+	'scrapy.contrib.feedexport.FeedExporter': None,
+}
+
 MONGO_LOG = 'scrape_log'
 CAPTCHA_KEY = '4fe73c77a83c95a2c6fe146c509dfe88'
 

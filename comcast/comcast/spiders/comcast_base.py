@@ -67,9 +67,21 @@ class ComcastSpiderBase(BaseSpider):
                     return
 
             browser.find_element_by_name('passwd').submit()
-            cookies = browser.get_cookies()
+            while True:
+                try:
+                    browser.find_element_by_id('loadingMessage')
+                except:
+                    break
+                time.sleep(2)
+
             browser.save_screenshot('/tmp/log.png')
             source = browser.page_source
+            div = soup.find('div',
+                    id="ctl00_ContentArea_AccountDetails_PnlAccountInfo")
+            if div:
+                self.log.msg(div.text)
+            else:
+                self.log.msg("No account block text")
             self.parse_comcast(browser)
         except:
             raise

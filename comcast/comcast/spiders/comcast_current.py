@@ -53,5 +53,11 @@ class ComcastCurrentSpider(ComcastSpiderBase):
             if n.lower() == 'total bill':
                 item['total'] = amount
         item['bill'] = results
-        return item
+        browser.find_element_by_id('ctl00_ContentArea_BillDetails_latestbillPdfButton').click()
+        time.sleep(5)
+        files = os.listdir(self.pdf_folder)
+        if files:
+            self.parse_pdf(files[0])
+
+        return [item]
 

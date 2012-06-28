@@ -11,6 +11,14 @@ from scrapy import log
 from scrapy.exceptions import CloseSpider
 from scrapy.conf import settings
 
+from pdfminer.pdfparser import PDFDocument, PDFParser
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter, process_pdf
+from pdfminer.pdfdevice import PDFDevice, TagExtractor
+from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
+from pdfminer.cmapdb import CMapDB
+from pdfminer.layout import LAParams
+from cStringIO import StringIO
+
 from BeautifulSoup import BeautifulSoup
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -33,6 +41,7 @@ class ComcastSpiderBase(BaseSpider):
         self.password = None
         self.username = 'sseshechela@comcast.net'
         self.password = 'Java9873%man'
+        self.pdf_folder = 'tmppdf'
         self.errors = []
         self.log = log
 
@@ -45,8 +54,19 @@ class ComcastSpiderBase(BaseSpider):
             raise CloseSpider('No credentials')
         display = Display(visible=0, size=(800, 600))
         display.start()
+        tmppdf = self.pdf_folder
+        if not os.path.isdir(tmppdf):
+            os.mkdir(tmppdf)
+        fp = webdriver.FirefoxProfile()
+
+        fp.set_preference("browser.download.folderList",2)
+        fp.set_preference("browser.download.manager.showWhenStarting",False)
+        fp.set_preference("browser.download.dir", tmppdf)
+        fp.set_preference("browser.helperApps.neverAsk.saveToDisk",
+            "application/pdf")
+
         try:
-            browser = webdriver.Firefox()
+            browser = webdriver.Firefox(firefox_profile=fp)
             browser.get(self._BILLS_URL)
             browser.find_element_by_id('user').click()
             browser.find_element_by_id('user').send_keys(self.username)
@@ -93,8 +113,9 @@ class ComcastSpiderBase(BaseSpider):
                     yield item
             else:
                 self.log.msg("No account block text")
-            curitem = self.parse_comcast(browser)
-            yield curitem
+            items = self.parse_comcast(browser)
+            for item in items:
+                yield item
         except:
             raise
         finally:
@@ -142,8 +163,7 @@ Content-Type: image/gif
 	res_url+= "?" + urllib.urlencode({'key': key, 'action': 'get', 'id': cap_id})
 	while 1:
             res= urllib.urlopen(res_url).read()
-            if res == 'CAPCHA_NOT_READY':
-                time.sleep(1)
+            if res == 'CAPCHA_NOT_READY': time.sleep(1)
                 continue
             break
 
@@ -156,4 +176,52 @@ Content-Type: image/gif
     def parse_comcast(self, browser):
         """interface method for spider logic"""
         raise NotImplementedError("This method have to be overriden in derived class")
+
+    def parse_pdf(self, pdfpath):
+        string = self.pdf_to_string(pdfpath)
+        isservice = False
+        isservice_cost = False
+        lines = string.split('\n')
+        services = []
+        services_cost = []
+        for i, line in enumerate(lines):
+            if not services and line == 'New Charges Summary':
+                isservice = True
+                continue
+            if line == 'Total New Charges':
+                isservice = False
+                if services:
+                    services.append('Total')
+            if (not isservice and services and not services_cost and
+                    not re.search('[^0-9-\.]', line) and
+                  not lines[i+1]):
+                isservice_cost = True
+            if isservice_cost and '$' in line:
+                isservice_cost = False
+                services_cost.append(line)
+
+            if isservice and line:
+                services.append(line)
+
+            if isservice_cost and line:
+                services_cost.append(line)
+        print services, services_cost
+        self.log.msg(lines)
+        return lines
+
+
+
+    def pdf_to_string(self, pdfpath):
+        rsrcmgr = PDFResourceManager()
+        stringio = StringIO()
+        codec = 'utf-8'
+        laparams = LAParams()
+        device = TextConverter(rsrcmgr, stringio, codec=codec, laparams=laparams)
+        with open(pdfpath, 'rb') as fp:
+            process_pdf(rsrcmgr, device, fp)
+        device.close()
+
+        pdfstr = stringio.getvalue()
+        stringio.close()
+        return pdfstr
 

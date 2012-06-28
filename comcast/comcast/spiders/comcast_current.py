@@ -62,8 +62,7 @@ class ComcastCurrentSpider(ComcastSpiderBase):
         self.log.msg("files %s" % str(files))
         if files:
             pdf_item = self.parse_pdf(os.path.join(self.pdf_folder, files[0]))
-            for f in files:
-                os.remove(os.path.join(self.pdf_folder, f))
+            self.clean_pdf_folder()
             item['services'] = pdf_item['services']
 
         return [item]

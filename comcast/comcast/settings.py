@@ -29,7 +29,7 @@ USER_ID = None
 
 SENDER_EMAIL = 'sysadmin@hooduku.com'
 SENDER_PASSWORD = 'admin9873%man'
-RECEIVER_EMAIL = 'snoopt@yandex.ru'
+RECEIVER_EMAIL = 'sudhi@hooduku.com'
 SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = '587'
 

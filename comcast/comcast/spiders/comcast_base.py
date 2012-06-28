@@ -126,9 +126,15 @@ class ComcastSpiderBase(BaseSpider):
         finally:
             browser.quit()
             display.stop()
+            self.clean_pdf_folder()
 
         return
 
+
+    def clean_pdf_folder(self):
+        files = os.listdir(self.pdf_folder)
+        for f in files:
+            os.remove(os.path.join(self.pdf_folder, f))
 
     def solve_captcha(self, data):
         key = settings.get('CAPTCHA_KEY')

@@ -78,13 +78,23 @@ class ComcastSpiderBase(BaseSpider):
 
             browser.save_screenshot('/tmp/log.png')
             source = browser.page_source
+            soup = BeautifulSoup(source)
+            fp = open('test.html', 'w')
+            fp.write(soup.prettify())
+            fp.close()
             div = soup.find('div',
                     id="ctl00_ContentArea_AccountDetails_PnlAccountInfo")
             if div:
                 self.log.msg(div.text)
+                acc = re.findall("([0-9]+)", div.text)
+                if acc:
+                    item = ComcastAccount()
+                    item['account_id'] = acc[0]
+                    yield item
             else:
                 self.log.msg("No account block text")
-            yield self.parse_comcast(browser)
+            curitem = self.parse_comcast(browser)
+            yield curitem
         except:
             raise
         finally:

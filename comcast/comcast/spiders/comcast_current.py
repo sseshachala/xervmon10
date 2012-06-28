@@ -41,14 +41,17 @@ class ComcastCurrentSpider(ComcastSpiderBase):
         item['enddate'] = date_to
         bill = block.find('ul', 'billing_list')
         lis = bill.findAll('li')[0:-1]
-        results = {}
+        results = []
         for li in lis:
+            result = {}
             n = li.text
             amount = li.find('span', 'amount').text
             n = n.replace(amount, '')
-            results[n] = amount
+            result['name'] = n
+            result['cost'] = amount
+            results.append(result)
+            if n.lower() == 'total bill':
+                item['total'] = amount
         item['bill'] = results
-        item['total'] = results['Total bill']
-        self.log.msg(item)
         return item
 

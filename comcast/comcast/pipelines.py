@@ -121,7 +121,7 @@ class MongoDBPipeline(object):
             obj = item.get_mongo_obj()
             self.sbills.append(obj)
 
-        elif isistance(item, ComcastCurrent):
+        elif isinstance(item, ComcastCurrent):
             item['cloud_account_id'] = self.user_id
             item['account_id'] = self.account_id
             obj = item.get_mongo_obj()
@@ -190,7 +190,7 @@ class MongoDBPipeline(object):
                 dict(
                     cloud_account_id=str(self.user_id),
                     account_id=self.account_id,
-                    enddate=self.comcurrent.enddate
+                    enddate=self.comcurrent['enddate']
                 ))
             self.mongodb[ComcastCurrent._collection_name].insert(self.comcurrent)
 

@@ -57,7 +57,7 @@ class ComcastSpiderBase(BaseSpider):
                 pass
             if capt:
                 cap_url = capt.get_attribute('src')
-                gif = urllib2.urlopen(cap_url)
+                gif = urllib2.urlopen(cap_url).read()
                 status, captext = self.solve_captcha(gif)
                 self.log.msg('%s %s' % (status, captext))
                 if status == 'ERROR':
@@ -130,7 +130,20 @@ Content-Type: image/gif
 
 
     def after_login(self, response):
-        pass
+        content = response.body
+        soup = BeautifulSoup(content)
+        try:
+            div = soup.find('li',
+                    'ctl00_ContentArea_AccountDetails_AccountSelectList1_AccountDetailStyleWrapper')
+            it = ComcastAccount()
+            it['account_id'] = div.text
+            yield it
+        except:
+            self.close_down =True
+            raise CloseSpider('No account id')
+        self.log.msg("Go to parsing")
+        yield Request(self._BILLS_URL, cookies=response.request.cookies, dont_filter=True,
+                callback=self.parse_comcast)
 
     def parse_comcast(self, response):
         """interface method for spider logic"""

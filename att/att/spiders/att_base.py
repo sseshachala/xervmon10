@@ -59,8 +59,6 @@ class AttSpiderBase(BaseSpider):
     def after_login(self, response):
         content = response.body
         soup = BeautifulSoup(content)
-        with open('bills.html', 'w') as fp:
-            fp.write(soup.prettify())
         try:
             div = soup.find('li', 'account-number')
             it = AttAccount()

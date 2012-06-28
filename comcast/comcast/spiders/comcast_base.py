@@ -57,10 +57,7 @@ class ComcastSpiderBase(BaseSpider):
                 pass
             if capt:
                 cap_url = capt.get_attribute('src')
-                print cap_url
                 gif = urllib2.urlopen(cap_url)
-                fp = open('tt.gif', 'wb').write(gif.read())
-                return
                 status, captext = self.solve_captcha(gif)
                 self.log.msg('%s %s' % (status, captext))
                 if status == 'ERROR':

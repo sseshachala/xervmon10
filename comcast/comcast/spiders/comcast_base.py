@@ -48,7 +48,9 @@ class ComcastSpiderBase(BaseSpider):
         try:
             browser = webdriver.Firefox()
             browser.get(self._BILLS_URL)
+            browser.find_element_by_id('user').click()
             browser.find_element_by_id('user').send_keys(self.username)
+            browser.find_element_by_id('passwd').click()
             browser.find_element_by_id('passwd').send_keys(self.password)
             capt = None
             try:
@@ -67,17 +69,16 @@ class ComcastSpiderBase(BaseSpider):
             browser.find_element_by_name('passwd').submit()
             cookies = browser.get_cookies()
             browser.save_screenshot('/tmp/log.png')
+            source = browser.page_source
+            self.parse_comcast(browser)
         except:
             raise
         finally:
             browser.quit()
             display.stop()
 
-        if cookies:
-            br_cookies = dict([(b['name'], b['value']) for b in cookies])
+        return
 
-        return Request(self._BILLS_URL, cookies=br_cookies,
-                callback=self.after_login)
 
     def solve_captcha(self, data):
         key = settings.get('CAPTCHA_KEY')
@@ -128,24 +129,7 @@ Content-Type: image/gif
 	else:
             return ('ERROR', res[0])
 
-
-    def after_login(self, response):
-        content = response.body
-        soup = BeautifulSoup(content)
-        try:
-            div = soup.find('li',
-                    'ctl00_ContentArea_AccountDetails_AccountSelectList1_AccountDetailStyleWrapper')
-            it = ComcastAccount()
-            it['account_id'] = div.text
-            yield it
-        except:
-            self.close_down =True
-            raise CloseSpider('No account id')
-        self.log.msg("Go to parsing")
-        yield Request(self._BILLS_URL, cookies=response.request.cookies, dont_filter=True,
-                callback=self.parse_comcast)
-
-    def parse_comcast(self, response):
+    def parse_comcast(self, browser):
         """interface method for spider logic"""
         raise NotImplementedError("This method have to be overriden in derived class")
 

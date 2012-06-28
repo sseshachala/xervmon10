@@ -25,6 +25,12 @@ class ComcastAccount(Item):
 class ComcastCurrent(MongoItem):
     _collection_name = "comcast_current"
     _mongo_keys = [
+            "startdate",
+            "enddate",
+            "cloud_account_id",
+            "account_id",
+            "total",
+            "bill"
             ]
 class ComcastBill(MongoItem):
     _collection_name = "comcast_data"

@@ -43,7 +43,8 @@ class ComcastSpiderBase(BaseSpider):
         self.password = None
         self.username = 'sseshechela@comcast.net'
         self.password = 'Java9873%man'
-        self.pdf_folder = 'tmppdf'
+        self.pdf_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                     'tmppdf')
         self.errors = []
         self.log = log
 
@@ -63,9 +64,7 @@ class ComcastSpiderBase(BaseSpider):
 
         fp.set_preference("browser.download.folderList",2)
         fp.set_preference("browser.download.manager.showWhenStarting",False)
-        fp.set_preference("browser.download.dir",
-                os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                    tmppdf))
+        fp.set_preference("browser.download.dir", tmppdf)
         fp.set_preference("browser.helperApps.neverAsk.saveToDisk",
             "application/pdf")
 
@@ -86,6 +85,7 @@ class ComcastSpiderBase(BaseSpider):
                 gif = urllib2.urlopen(cap_url).read()
                 status, captext = self.solve_captcha(gif)
                 self.log.msg('%s %s' % (status, captext))
+                browser.find_element_by_id('nucaptcha-answer').send_keys(captext)
                 if status == 'ERROR':
                     raise CloseSpider("Couldnt solve captcha. Error: %s" % captext)
                     return
@@ -187,17 +187,33 @@ Content-Type: image/gif
         string = self.pdf_to_string(pdfpath)
         isservice = False
         isservice_cost = False
+        isaccount = False
+        isaccount_name = True
         lines = string.split('\n')
         services = []
         services_cost = []
+        account_name = []
+        account_values = []
         for i, line in enumerate(lines):
+            if not account_name and line == 'Account Number':
+                isaccount = True
+            if isaccount and 'page' in line.lower():
+                isaccount = False
             if not services and line == 'New Charges Summary':
                 isservice = True
                 continue
-            if line == 'Total New Charges':
+            if isservice and line and lines[i+1]:
                 isservice = False
                 if services:
                     services.append('Total')
+                continue
+
+            if isservice and line == 'Total New Charges':
+                isservice = False
+                if services:
+                    services.append('Total')
+                continue
+
             if (not isservice and services and not services_cost and
                     not re.search('[^0-9-\.]', line) and
                   not lines[i+1]):
@@ -205,15 +221,41 @@ Content-Type: image/gif
             if isservice_cost and '$' in line:
                 isservice_cost = False
                 services_cost.append(line)
+                if len(services_cost) < len(services):
+                    services_cost = []
+                continue
+
+            if isaccount and not line:
+                isaccount_name = False
+                continue
+
+            if isaccount:
+                if isaccount_name:
+                    account_name.append(line)
+                else:
+                    account_values.append(line)
+                continue
 
             if isservice and line:
                 services.append(line)
 
             if isservice_cost and line:
                 services_cost.append(line)
+
         print services, services_cost
         self.log.msg(lines)
-        return lines
+        item = ComcastBill()
+        account = zip(account_name, account_values)
+        for name, value in account:
+            if name.lower() == 'billing date':
+                item['startdate'] = datetime.datetime.strptime(value, '%m/%d/%y')
+        item['services'] = []
+        for service, cost in zip(services, services_cost):
+            if service.lower() == 'total':
+                item['total'] = cost
+                continue
+            item['services'].append(dict(name=service, cost=cost))
+        return item
 
 
 

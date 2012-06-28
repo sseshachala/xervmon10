@@ -1,5 +1,8 @@
 #!/usr/bin/env python 
+
+import os
 import re
+import time
 import datetime
 from scrapy.spider import BaseSpider
 from scrapy.http import FormRequest, Request
@@ -56,8 +59,12 @@ class ComcastCurrentSpider(ComcastSpiderBase):
         browser.find_element_by_id('ctl00_ContentArea_BillDetails_latestbillPdfButton').click()
         time.sleep(5)
         files = os.listdir(self.pdf_folder)
+        self.log.msg("files %s" % str(files))
         if files:
-            self.parse_pdf(files[0])
+            pdf_item = self.parse_pdf(os.path.join(self.pdf_folder, files[0]))
+            for f in files:
+                os.remove(os.path.join(self.pdf_folder, f))
+            item['services'] = pdf_item['services']
 
         return [item]
 

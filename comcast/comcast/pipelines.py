@@ -153,7 +153,7 @@ class MongoDBPipeline(object):
                         cloud_account_id=str(self.user_id),
                         account_id=self.account_id
                     ))]
-            spider.invoices = [i[u'enddate'].strftime('%Y%m%d') for i in old_bills if isinstance(i[u'enddate'], type(now))]
+            spider.invoices = [i[u'startdate'] for i in old_bills if isinstance(i[u'startdate'], type(now))]
             log.msg("Old invoices %s" % spider.invoices)
 
     def ensure_index(self, Item):

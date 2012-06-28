@@ -30,7 +30,8 @@ class ComcastCurrent(MongoItem):
             "cloud_account_id",
             "account_id",
             "total",
-            "bill"
+            "bill",
+            "services"
             ]
 class ComcastBill(MongoItem):
     _collection_name = "comcast_data"
@@ -39,10 +40,7 @@ class ComcastBill(MongoItem):
             "account_id",
             "startdate",
             "enddate",
-            "service_accounts",
-            "account_charges",
-            "prior_activity",
-            "total_charges",
-            "total_amount"
+            "total",
+            "services"
             ]
 

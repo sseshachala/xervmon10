@@ -34,8 +34,8 @@ SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = '587'
 
 ITEM_PIPELINES = [
- #       'comcast.pipelines.MongoDBPipeline',
-  #      'comcast.pipelines.StatusPipeline'
+        'comcast.pipelines.MongoDBPipeline',
+        'comcast.pipelines.StatusPipeline'
         ]
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,

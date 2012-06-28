@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+import os
 import time
 import httplib
 import urllib
@@ -61,7 +63,9 @@ class ComcastSpiderBase(BaseSpider):
 
         fp.set_preference("browser.download.folderList",2)
         fp.set_preference("browser.download.manager.showWhenStarting",False)
-        fp.set_preference("browser.download.dir", tmppdf)
+        fp.set_preference("browser.download.dir",
+                os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                    tmppdf))
         fp.set_preference("browser.helperApps.neverAsk.saveToDisk",
             "application/pdf")
 
@@ -114,8 +118,9 @@ class ComcastSpiderBase(BaseSpider):
             else:
                 self.log.msg("No account block text")
             items = self.parse_comcast(browser)
-            for item in items:
-                yield item
+            if items:
+                for item in items:
+                    yield item
         except:
             raise
         finally:
@@ -163,7 +168,8 @@ Content-Type: image/gif
 	res_url+= "?" + urllib.urlencode({'key': key, 'action': 'get', 'id': cap_id})
 	while 1:
             res= urllib.urlopen(res_url).read()
-            if res == 'CAPCHA_NOT_READY': time.sleep(1)
+            if res == 'CAPCHA_NOT_READY':
+                time.sleep(1)
                 continue
             break
 

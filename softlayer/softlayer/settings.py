@@ -37,7 +37,7 @@ SPIDER_MIDDLEWARES = {
 
 ITEM_PIPELINES = [
         'softlayer.pipelines.MongoDBPipeline',
-        'softlayer.pipelines.StatusPipeline'
+        'basecrawler.pipelines.StatusPipeline'
         ]
 
 EXTENSIONS = {

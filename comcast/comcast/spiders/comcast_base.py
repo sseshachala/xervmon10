@@ -7,6 +7,7 @@ import urllib
 import urllib2
 import re
 import datetime
+from dateutil.relativedelta import relativedelta
 from scrapy.spider import BaseSpider
 from scrapy.http import FormRequest, Request
 from scrapy import log
@@ -41,9 +42,7 @@ class ComcastSpiderBase(BaseSpider):
         self.close_down = False
         self.username = None
         self.password = None
-        self.username = 'sseshechela@comcast.net'
-        self.password = 'Java9873%man'
-        self.pdf_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        self.pdf_folder = os.path.join('/tmp',
                      'tmppdf')
         self.errors = []
         self.log = log
@@ -55,11 +54,12 @@ class ComcastSpiderBase(BaseSpider):
             self.close_down = True
             self.log.msg("No credentials", level=log.ERROR)
             raise CloseSpider('No credentials')
+            return
         display = Display(visible=0, size=(800, 600))
         display.start()
         tmppdf = self.pdf_folder
         if not os.path.isdir(tmppdf):
-            os.mkdir(tmppdf)
+            os.makedirs(tmppdf)
         fp = webdriver.FirefoxProfile()
 
         fp.set_preference("browser.download.folderList",2)
@@ -93,19 +93,23 @@ class ComcastSpiderBase(BaseSpider):
                 self.log.msg("No Captcha found")
 
             browser.find_element_by_name('passwd').submit()
+            loading_time = 0
             while True:
+                if loading_time > 30:
+                    break
                 try:
                     browser.find_element_by_id('loadingMessage')
                 except:
                     break
+                loading_time += 2
                 time.sleep(2)
 
             browser.save_screenshot('/tmp/log.png')
             source = browser.page_source
             soup = BeautifulSoup(source)
-            fp = open('test.html', 'w')
-            fp.write(soup.prettify())
-            fp.close()
+            # fp = open('test.html', 'w')
+            # fp.write(soup.prettify())
+            # fp.close()
             div = soup.find('div',
                     id="ctl00_ContentArea_AccountDetails_PnlAccountInfo")
             if div:
@@ -255,6 +259,7 @@ Content-Type: image/gif
         for name, value in account:
             if name.lower() == 'billing date':
                 item['startdate'] = datetime.datetime.strptime(value, '%m/%d/%y')
+                item['enddate'] = item['startdate'] +relativedelta(months=+1, days=-1)
         item['services'] = []
         for service, cost in zip(services, services_cost):
             if service.lower() == 'total':

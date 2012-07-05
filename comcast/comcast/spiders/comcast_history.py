@@ -36,8 +36,9 @@ class ComcastCurrentSpider(ComcastSpiderBase):
         items = []
         displ_list = browser.find_element_by_xpath('//div[@class="statement_list"]/div[@class="select_display"]/a')
         for i, link in enumerate(links):
-            if i == 0:
-                continue
+            # if i == 0:
+                # skip current
+                # continue
             displ_list.click()
             link.click()
             idate = browser.find_element_by_xpath('//div[@class="statement_list"]/div[@class="select_display"]/span')

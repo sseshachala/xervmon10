@@ -36,7 +36,7 @@ MONGO_LOG = 'scrape_log'
 
 ITEM_PIPELINES = [
         'att.pipelines.MongoDBPipeline',
-        'att.pipelines.StatusPipeline'
+        'basecrawler.pipelines.StatusPipeline'
         ]
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,

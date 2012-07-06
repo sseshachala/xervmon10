@@ -23,22 +23,21 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         self.old_bills = []
 
     def process_item(self, item, spider):
-        if not self.account_id and isinstance(item, ComcastAccount):
+        if not self.account_id and isinstance(item, TimewarnerAccount):
             self.account_id = item['account_id']
             self._update_account_id()
 
-        elif isinstance(item, ComcastBill):
+        elif isinstance(item, TimewarnerData):
             item['cloud_account_id'] = self.user_id
             item['account_id'] = self.account_id
             obj = item.get_mongo_obj()
             self.sbills.append(obj)
 
-        elif isinstance(item, ComcastCurrent):
+        elif isinstance(item, TimewarnerCurrent):
             item['cloud_account_id'] = self.user_id
             item['account_id'] = self.account_id
             obj = item.get_mongo_obj()
             self.comcurrent = obj
-
 
         return item
 
@@ -57,10 +56,10 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         spider.username = u
         spider.password = p
         now = datetime.datetime.now()
-        self.ensure_index(ComcastBill)
+        self.ensure_index(TimewarnerData)
         if self.got_acid:
             old_bills = [i for i in
-                self.mongodb[ComcastBill._collection_name].find(
+                self.mongodb[TimewarnerData._collection_name].find(
                     dict(
                         cloud_account_id=str(self.user_id),
                         account_id=self.account_id
@@ -72,12 +71,11 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         if spider.close_down or not self.account_id or not self.user_id:
             return
 
-        self._write_to_mongo(self.sbills, ComcastBill._collection_name)
+        self._write_to_mongo(self.sbills, TimewarnerData._collection_name)
         if self.comcurrent:
-            prev = self.mongodb[ComcastCurrent._collection_name].remove(
+            prev = self.mongodb[TimewarnerCurrent._collection_name].remove(
                 dict(
                     cloud_account_id=str(self.user_id),
-                    account_id=self.account_id,
-                    enddate=self.comcurrent['enddate']
+                    account_id=self.account_id
                 ))
-            self.mongodb[ComcastCurrent._collection_name].insert(self.comcurrent)
+            self.mongodb[TimewarnerCurrent._collection_name].insert(self.comcurrent)

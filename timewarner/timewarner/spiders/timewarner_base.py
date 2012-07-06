@@ -25,8 +25,6 @@ class TimewarnerSpiderBase(BaseSpider):
         self.account_id = None
         self.username = None
         self.password = None
-        self.username = 'sudhi@hooduku.com'
-        self.password = 'Java0man'
         self.close_down = False
         self.errors = []
         self.log = log

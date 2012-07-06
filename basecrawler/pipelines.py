@@ -113,7 +113,7 @@ class BaseMongoDBPipeline(object):
     def run_more_spider(self, name):
         url = 'http://localhost:6800/schedule.json'
         data = {
-                'project': 'comcast',
+                'project': settings.get('BOT_NAME'),
                 'spider': name,
                 'setting': 'USER_ID=%s' % self.user_id
                 }

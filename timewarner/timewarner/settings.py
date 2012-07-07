@@ -14,7 +14,12 @@ NEWSPIDER_MODULE = 'timewarner.spiders'
 USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
 
 USER_AGENT = '''Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.162 Safari/535.19'''
-DOWNLOAD_DELAY = 1
+
+# server reports period set on server side
+# so we need to wait and make in sequentially
+DOWNLOAD_DELAY = 0.25
+CONCURRENT_REQUESTS = 1
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
 
 MONGO_DB = 'xervmon_remote'
 MONGO_HOST = 'mongodb://%s:%s@%s:%s/%s' % ('xervmon_remote', 'xervmonremote',

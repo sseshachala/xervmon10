@@ -46,19 +46,26 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
             if not inp_name:
                 continue
             formdata[inp_name] = inp.get('value', '')
+        self.allrequest = []
         for dat in dates:
+            formdata_it = formdata.copy()
             try:
                 datmonth = datetime.datetime.strptime(dat.text, '%b-%Y')
             except:
                 continue
+            if '%s-%s' % (datmonth.month, datmonth.year) in self.invoices:
+                self.log.msg("Invoice %s already in db. Skipping" % datmonth)
+                continue
             datval = dat.get('value')
             self.log.msg("Found invoice date %s with value %s" % (datmonth,
                 dat.get('value')))
-            formdata["ReportViewer2$ctl00$ctl03$ddValue"] = datval
-            yield FormRequest(response.url,
-                    formdata=formdata, callback=self.get_csv, meta={'month':
-                        datmonth})
-
+            formdata_it["ReportViewer2$ctl00$ctl03$ddValue"] = datval
+            rargs = [response.url]
+            rkwargs = dict(
+                    formdata=formdata_it, callback=self.get_csv, meta={'month':
+                        datmonth}, dont_filter=True, headers={'referer': response.url})
+            self.allrequest.append({'a': rargs, 'k': rkwargs})
+        yield self.update_month()
 
     def get_csv(self, response):
         body = response.body
@@ -68,10 +75,9 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
                     body)[0].replace('\\', '')
         except:
             self.log.msg("Error finding csv url")
-            yield
-        self.log.msg("Parse url %s" % url_base)
-        yield Request(urlparse.urljoin(self._DOWNLOAD_URL, url_base+"CSV"),
-                callback=self.parse_csv, meta=meta, dont_filter=True)
+            return
+        return Request(urlparse.urljoin(self._DOWNLOAD_URL, url_base+"CSV"),
+                callback=self.parse_csv, meta=meta, dont_filter=True, priority=5)
 
 
     def parse_csv(self, response):
@@ -90,6 +96,7 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
             if not l:
                 continue
             entries.append(dict(map(lambda x,y: (x, y.strip()), names, l)))
+
         def parse_csv_date(date):
             date_format = '%m/%d/%Y'
             try:
@@ -106,23 +113,38 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
             inv['startdate'] = inv['enddate'] +relativedelta(months=-1, days=+1)
 
         services = {}
+        item_services = {}
         for e in entries:
-            cat = e['RECTYPELETTERCODE'].split(':')
-            if len(cat) > 1:
-                cat = ':'.join(cat[1:])
+            cat_name = e['RECTYPELETTERCODE'].split(':')
+            if len(cat_name) > 1:
+                cat_name = ':'.join(cat_name[1:]).strip()
             else:
-                cat = cat[0]
-            cat = cat.strip()
-            if not cat in services:
-                services[cat] = {}
-            cat = services[cat]
+                cat_name = cat_name[0]
+            cat_name = cat_name.strip()
+            if not cat_name in services:
+                services[cat_name] = {}
+            cat = services[cat_name]
             if not 'total' in cat:
                 cat['total'] = e['BILLABLE_AMOUNT1']
 
-            subcat = e['GENERAL_CHARGES_CATEGORY_DESC']
-            if not subcat in cat:
-                cat[subcat] = {}
-            subcat = cat[subcat]
+            subcat_name = e['GENERAL_CHARGES_CATEGORY_DESC'].strip()
+            if not subcat_name in cat:
+                cat[subcat_name] = {}
+            subcat = cat[subcat_name]
+            charge = round(float(e['SUMOFBILLABLE_AMOUNT'].replace('$', '').replace(',', '')), 2)
+            service_name = '%s-%s-%s' % (cat_name, subcat_name, e['CHARGED_DESC'])
+            if subcat == 'TAXES AND SURCHARGES':
+                if not 'taxes' in item_services:
+                    item_services['taxes'] = 0
+                item_services['taxes'] += charge
+            else:
+                if not service_name in item_services:
+                    item_services[service_name] = 0
+                item_services[service_name] += charge
+
+            continue
+            # we dont need it now
+
             if not 'total' in subcat:
                 subcat['total'] = e['BILLABLE_AMOUNT']
 
@@ -139,8 +161,18 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
             item['startdate'] = startdate
             item['enddate'] = enddate
             subcat[item['name']] = item
-        inv['services'] = services
+        inv['services'] = item_services
         yield inv
+        yield self.update_month()
+
+    def update_month(self):
+        try:
+            req = self.allrequest.pop()
+        except:
+            return
+        rargs = req['a']
+        rkwargs = req['k']
+        return FormRequest(*rargs, **rkwargs)
 
 
 

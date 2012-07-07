@@ -23,6 +23,11 @@ class TimewarnerCurrentSpider(TimewarnerSpiderBase):
     def parse_current(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
         item = TimewarnerCurrent()
+        select_acc = soup.find('select', {'name': 'ctl00$MasterMainContentPlaceHolder$accountDropDown'})
+        opt_acc = select_acc.find('option', selected="selected")
+        acc = TimewarnerAccount()
+        acc['account_id'] = opt_acc.text
+        yield acc
         item['total'] = soup.find('span',
                 id='ctl00_MasterMainContentPlaceHolder_ctrlSnapshot_currentChargesLabel').text.strip()
         item['tax'] = soup.find('span',

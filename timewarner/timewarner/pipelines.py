@@ -64,7 +64,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                         cloud_account_id=str(self.user_id),
                         account_id=self.account_id
                     ))]
-            spider.invoices = [i[u'startdate'] for i in old_bills if isinstance(i[u'startdate'], type(now))]
+            spider.invoices = ['%s-%s' % (i[u'enddate'].month, i[u'enddate'].year) for i in old_bills if isinstance(i[u'enddate'], type(now))]
             log.msg("Old invoices %s" % spider.invoices)
 
     def close_spider(self, spider):

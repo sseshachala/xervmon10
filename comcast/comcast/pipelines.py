@@ -43,19 +43,12 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         return item
 
     def open_spider(self, spider):
-        # check userid and credentials
-        if not self.user_id:
-            log.msg('No user id')
-            spider.close_down = True
+        res = super(MongoDBPipeline, self).open_spider(spider)
+        if not res:
             return
 
-        u, p, self.got_acid = self._get_credentials()
-        if not u or not p:
-            log.msg('No login or password')
-            spider.close_down = True
-            return
-        spider.username = u
-        spider.password = p
+        spider.username = self.username
+        spider.password = self.password
         now = datetime.datetime.now()
         self.ensure_index(ComcastBill)
         if self.got_acid:

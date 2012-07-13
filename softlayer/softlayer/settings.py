@@ -13,9 +13,14 @@ SPIDER_MODULES = ['softlayer.spiders']
 NEWSPIDER_MODULE = 'softlayer.spiders'
 USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
 
+
 MONGO_DB = 'xervmon_remote'
-MONGO_HOST = 'mongodb://%s:%s@%s:%s/%s' % ('xervmon_remote', 'xervmonremote',
-    '184.106.197.102', '27017', MONGO_DB)
+MONGO_USER = 'xervmon_remote'
+MONGO_PASSWORD = 'xervmonremote'
+MONGO_PORT = '27017'
+MONGO_IP = '184.106.197.102'
+MONGO_HOST = 'mongodb://%s:%s@%s:%s/%s' % (MONGO_USER, MONGO_PASSWORD, MONGO_IP,
+                             MONGO_PORT, MONGO_DB)
 
 MYSQL_USER = 'xervmon_remote'
 MYSQL_PASSWORD = 'Java23man'
@@ -33,7 +38,7 @@ SMTP_PORT = '587'
 MONGO_LOG = 'scrape_log'
 
 SPIDER_MIDDLEWARES = {
-         'softlayer.middlewares.ErrorsMiddleware': 100
+        'basecrawler.middlewares.ErrorsMiddleware': 100
         }
 
 ITEM_PIPELINES = [

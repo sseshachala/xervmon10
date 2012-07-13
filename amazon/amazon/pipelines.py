@@ -37,15 +37,15 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         return item
 
     def open_spider(self, spider):
-        if not self.user_id:
-            log.msg('No user id')
-            spider.close_down = True
+        res = super(MongoDBPipeline, self).open_spider(spider)
+        if not res:
             return
 
-        u, p, self.got_acid = self._get_credentials()
         spider.iam = self.iam
         spider.user_id = self.user_id
         spider.account_id = self.account_id
+        spider.username = self.username
+        spider.password = self.password
         if spider.iam:
             spider.start_urls = [spider.IAM_LOGIN_URL % self.account_id]
             log.msg("IAM mode with starturl %s" % str(spider.start_urls))
@@ -58,8 +58,6 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             if fields not in inv.keys():
                 continue
             spider.invoices.append(dict([(k, inv[k]) for k in inv if k in fields]))
-        spider.username = u
-        spider.password = p
 
     def close_spider(self, spider):
         if spider.close_down or not self.account_id or not self.user_id:
@@ -80,14 +78,12 @@ class MongoDBPipeline(BaseMongoDBPipeline):
 
 
     def _get_credentials(self):
-        user = self.session.query(Users).filter_by(id=self.user_id).first()
+        user = super(MongoDBPipeline, self)._get_credentials()
         if not user:
-            return (None, None, False)
+            return None
         cred_type = user.credential_type
-        password = self._decrypt_password(user.password)
-        self.account_id = user.account_id
         if cred_type == 'IAM':
             self.iam = True
         else:
             self.iam = False
-        return (user.account_user, user.password, user.account_id != "")
+        return user

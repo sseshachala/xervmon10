@@ -68,7 +68,8 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             log.msg("Old invoices %s" % spider.invoices)
 
     def close_spider(self, spider):
-        if spider.close_down or not self.account_id or not self.user_id:
+        res = super(MongoDBPipeline, self).close_spider(spider)
+        if not res:
             return
         if spider.name == 'softlayer_current':
             self.mongodb[SoftlayerUsage._collection_name].remove(

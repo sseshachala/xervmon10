@@ -60,11 +60,9 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             spider.invoices.append(dict([(k, inv[k]) for k in inv if k in fields]))
 
     def close_spider(self, spider):
-        if spider.close_down or not self.account_id or not self.user_id:
+        res = super(MongoDBPipeline, self).close_spider(spider)
+        if not res:
             return
-        basecharges = [d for d in self.mongodb[AmazonCharges._collection_name].find(dict(cloud_account_id=self.user_id))]
-        usage = []
-        charges = []
         if spider.name == 'aws_current':
             for it in self.acharges:
                 obj = it

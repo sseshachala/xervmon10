@@ -24,12 +24,16 @@ Base = declarative_base()
 SqliteSession = sessionmaker(bind=engine)
 SESSION = SqliteSession()
 Base.metadata.bind = engine
-MONGO_CONN = pymongo.Connection(settings.get('MONGO_HOST'))
-MONGO_CONN = MONGO_CONN[settings['MONGO_DB']]
-MONGO_CONN.authenticate(settings['MONGO_USER'], settings['MONGO_PASSWORD'])
 
 LOGCOL = settings.get("MONGO_LOG")
 
+def mongo_connect():
+    MONGO_CONN = pymongo.Connection(settings.get('MONGO_HOST'))
+    MONGO_CONN = MONGO_CONN[settings['MONGO_DB']]
+    MONGO_CONN.authenticate(settings['MONGO_USER'], settings['MONGO_PASSWORD'])
+    return MONGO_CONN
+
+MONGO_CONN = mongo_connect()
 
 class StatusPipeline(object):
     def __init__(self):
@@ -49,6 +53,7 @@ class StatusPipeline(object):
 
     def close_spider(self, spider):
         log.msg(spider)
+        self.mongodb = mongo_connect()
         cmd = spider.name
         e = ''
         if spider.errors:
@@ -135,6 +140,12 @@ class BaseMongoDBPipeline(object):
             return False
         return True
 
+    def close_spider(self, spider):
+        if spider.close_down or not self.account_id or not self.user_id:
+            return False
+        self.mongodb = mongo_connect()
+        return True
+
     def ensure_index(self, Item):
         if not hasattr(Item, '_mongo_keys') or not hasattr(Item,
                 '_collection_name'):
@@ -202,7 +213,6 @@ class BaseMongoDBPipeline(object):
         for start in range(0, len(dcode), block_size):
             padded_text += enc.decrypt(dcode[start:start+block_size])
         password = padded_text.split('\x00', 1)[0]
-        log.msg(password)
         
         return password
 

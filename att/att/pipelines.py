@@ -31,6 +31,11 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             self.sbills.append(obj)
 
         return item
+    def close_spider(self, spider):
+        res = super(MongoDBPipeline, self).close_spider(spider)
+        if not res:
+            return
+        self._write_to_mongo(self.sbills, AttBill._collection_name)
 
     def open_spider(self, spider):
         res = super(MongoDBPipeline, self).open_spider(spider)

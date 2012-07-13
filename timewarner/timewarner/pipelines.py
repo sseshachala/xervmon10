@@ -61,7 +61,8 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             log.msg("Old invoices %s" % spider.invoices)
 
     def close_spider(self, spider):
-        if spider.close_down or not self.account_id or not self.user_id:
+        res = super(MongoDBPipeline, self).close_spider(spider)
+        if not res:
             return
 
         self._write_to_mongo(self.sbills, TimewarnerData._collection_name)

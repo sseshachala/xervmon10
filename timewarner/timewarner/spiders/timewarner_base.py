@@ -27,6 +27,7 @@ class TimewarnerSpiderBase(BaseSpider):
         self.password = None
         self.close_down = False
         self.errors = []
+        self.invoices = []
         self.log = log
 
     def parse(self, response):

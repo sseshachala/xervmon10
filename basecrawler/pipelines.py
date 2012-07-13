@@ -173,7 +173,9 @@ class BaseMongoDBPipeline(object):
     def _write_to_mongo(self, bulk, col):
         if not bulk:
             return
-        self.mongodb[col].insert(bulk)
+        mongo_insert = 1000
+        for b in xrange(0, len(bulk), mongo_insert):
+            self.mongodb[col].insert(bulk[b:b + mongo_insert])
         return
 
     def _get_credentials(self):

@@ -1,4 +1,6 @@
 import sys
+import os
 
-sys.path.append('/home/sysadmin/controlpanel/crawlers/basecrawler')
-sys.path.append('/home/sysadmin/controlpanel/crawlers/')
+curdir = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(os.path.join(curdir, os.pardir, os.pardir))

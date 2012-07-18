@@ -106,10 +106,11 @@ class MongoDBPipeline(BaseMongoDBPipeline):
 
 
     def close_spider(self, spider):
+        res = super(MongoDBPipeline, self).close_spider(spider)
+        if not res:
+            return
         rusage = []
         rservers = []
-        if spider.close_down or not self.account_id or not self.user_id:
-            return
         if spider.name == 'rack_current':
             self.mongodb[RackServers._collection_name].remove(dict(
                 cloud_account_id = self.user_id,

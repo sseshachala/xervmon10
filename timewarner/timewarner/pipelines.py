@@ -30,6 +30,9 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         elif isinstance(item, TimewarnerData):
             item['cloud_account_id'] = self.user_id
             item['account_id'] = self.account_id
+            for service in item['services'].keys():
+                if service and not service in spider.new_services:
+                    spider.new_services.append(service)
             obj = item.get_mongo_obj()
             self.sbills.append(obj)
 

@@ -36,7 +36,7 @@ MYSQL_DB = 'controlpanel'
 MYSQL_HOST = '184.106.197.102'
 
 USER_ID = None
-# KEY = 'yDo4V5B0j9V3JRJ4lO55q77Wm5r7dLC8'
+KEY = 'yDo4V5B0j9V3JRJ4lO55q77Wm5r7dLC8'
 
 SENDER_EMAIL = 'sysadmin@hooduku.com'
 SENDER_PASSWORD = 'admin9873%man'
@@ -48,8 +48,8 @@ SPIDER_MIDDLEWARES = {
         'basecrawler.middlewares.ErrorsMiddleware': 100
         }
 ITEM_PIPELINES = [
-        # 'hpcloud.pipelines.MongoDBPipeline',
-        # 'basecrawler.pipelines.StatusPipeline'
+        'hpcloud.pipelines.MongoDBPipeline',
+        'basecrawler.pipelines.StatusPipeline'
         ]
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,

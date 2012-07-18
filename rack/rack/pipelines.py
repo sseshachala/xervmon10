@@ -64,6 +64,9 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         if isinstance(item, RackUsage):
             item['cloud_account_id'] = self.user_id
             obj = item.get_mongo_obj()
+            service = item['usagetype']
+            if service and not service in spider.new_services:
+                spider.new_services.append(service)
             if obj in self.old_usage:
                 return
             self.rusage.append(item)

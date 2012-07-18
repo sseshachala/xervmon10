@@ -30,6 +30,10 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         elif isinstance(item, ComcastBill):
             item['cloud_account_id'] = self.user_id
             item['account_id'] = self.account_id
+            for spec in item['services']:
+                service = spec['name']
+                if service and not service in spider.new_services:
+                    spider.new_services.append(service)
             obj = item.get_mongo_obj()
             self.sbills.append(obj)
 

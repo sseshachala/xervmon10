@@ -30,6 +30,8 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             item['cloud_account_id'] = self.user_id
             obj = item.get_mongo_obj()
             self.acharges.append(obj)
+            if item['service'] and not item['service'] in spider.new_services:
+                spider.new_services.append(item['service'])
         elif isinstance(item, AmazonUsage):
             item['cloud_account_id'] = self.user_id
             obj = item.get_mongo_obj()

@@ -32,6 +32,9 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             item['account_id'] = self.account_id
             obj = item.get_mongo_obj()
             self.sbills.append(obj)
+            for service in item['services'].keys():
+                if not service in spider.new_services:
+                    spider.new_services.append(service)
 
         elif isinstance(item, HPCloudCurrent):
             item['cloud_account_id'] = self.user_id
@@ -49,7 +52,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         spider.username = self.username
         spider.password = self.password
         now = datetime.datetime.now()
-        self.ensure_index(hpcloudData)
+        self.ensure_index(HPCloudData)
         if self.got_acid:
             old_bills = [i for i in
                 self.mongodb[HPCloudData._collection_name].find(
@@ -57,14 +60,15 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                         cloud_account_id=str(self.user_id),
                         account_id=self.account_id
                     ))]
-            spider.invoices = ['%s-%s' % (i[u'enddate'].month, i[u'enddate'].year) for i in old_bills if isinstance(i[u'enddate'], type(now))]
+            spider.invoices = [i['invoice_number'] for i in old_bills]
             log.msg("Old invoices %s" % spider.invoices)
 
     def close_spider(self, spider):
-        if spider.close_down or not self.account_id or not self.user_id:
+        res = super(MongoDBPipeline, self).close_spider(spider)
+        if not res:
             return
 
-        self._write_to_mongo(self.sbills, hpcloudData._collection_name)
+        self._write_to_mongo(self.sbills, HPCloudData._collection_name)
         if self.comcurrent:
             prev = self.mongodb[HPCloudCurrent._collection_name].remove(
                 dict(

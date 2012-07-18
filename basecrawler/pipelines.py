@@ -106,9 +106,11 @@ class BaseMongoDBPipeline(object):
     def __init__(self):
         self.username = None
         self.passowrd = None
+        self.provider_id = None
         self.got_acid = False
         self.session = SESSION
         self.mongodb = MONGO_CONN
+        self.service_col = 'providers_services'
         self.user_id = settings.get('USER_ID')
         log.msg('User id is %s' % self.user_id)
         self.closeEngine = ''
@@ -137,12 +139,18 @@ class BaseMongoDBPipeline(object):
             spider.errors.append('No login or password')
             spider.close_down = True
             return False
+        spider.new_services = []
         return True
 
     def close_spider(self, spider):
         if spider.close_down or not self.account_id or not self.user_id:
             return False
         self.mongodb = mongo_connect()
+        if hasattr(spider, 'new_services') and spider.new_services:
+            cur_services = [s['name'] for s in self.mongodb[self.service_col].find(dict(id=self.provider_id))]
+            now = datetime.datetime.now()
+            servic = [{'id': self.provider_id, 'name': s, 'date': now} for s in spider.new_services if not s in cur_services]
+            self._write_to_mongo(servic, self.service_col)
         return True
 
     def ensure_index(self, Item):
@@ -185,6 +193,7 @@ class BaseMongoDBPipeline(object):
             return None
         if user:
             self.account_id = user.account_id
+            self.provider_id = user.cloud_provider
             try:
                 self.password = self._decrypt_password(user.password)
             except Exception, e:

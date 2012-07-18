@@ -27,6 +27,8 @@ class HPCloudData(MongoItem):
             "startdate",
             "enddate",
             "total",
-            "services"
+            "services",
+            "totals",
+            "invoice_number"
             ]
 

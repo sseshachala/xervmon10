@@ -13,14 +13,72 @@ from BeautifulSoup import BeautifulSoup
 
 from hpcloud.items import *
 
-from hpcloud_base import hpcloudSpiderBase
+from hpcloud_base import HPCloudSpiderBase
 
-class HPCloudHistorySpider(hpcloudSpiderBase):
+class HPCloudHistorySpider(HPCloudSpiderBase):
     name = 'hpcloud_history'
 
     def parse_hpcloud(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
         inv_table = soup.find('table', 'table_data')
-        inv_links = inv_table.findAll('a', lambda x: 'invoiceDate' in x.id)
+        inv_links = inv_table.findAll('a', id=re.compile("invoiceDate"))
         log.msg(str(inv_links))
-        return
+        for link in inv_links:
+            href = link.attrMap.get('href')
+            if not href:
+                continue
+            yield Request(urlparse.urljoin(response.url, href), dont_filter=True, callback=self.parse_invoice)
+
+    def parse_invoice(self, response):
+        soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
+        inv = HPCloudData()
+        content = soup.find('div', id='content')
+        header = content.header
+        dat = header.findAll('strong')
+        log.msg(dat)
+        startdate = dat[1].text
+        enddate = dat[2].text
+        templ = '%B %d, %Y'
+        inv['startdate'] = datetime.datetime.strptime(startdate, templ)
+        inv['enddate'] = datetime.datetime.strptime(enddate, templ)
+        inv['invoice_number'] = dat[3].text
+        if inv['invoice_number'] in self.invoices:
+            log.msg("Skipping. Invoice number already in db")
+            return
+        services = {}
+        sections = content.findAll('section')
+        totals = []
+        for section in sections:
+            if section.get('id') == u'invoice_totals':
+                tb = section.tbody
+                for tr in tb.findAll('tr'):
+                    tds = tr.findAll('td')
+                    tds = map(lambda x: x.text.lower().strip(), tds)
+                    us = {}
+                    us['name'] = tds[0]
+                    us['cost'] = tds[1]
+                    totals.append(us)
+                tf = section.tfoot
+                for tr in tf.findAll('tr'):
+                    tds = tr.findAll('td')
+                    tds = map(lambda x: x.text.lower().strip(), tds)
+                    if tds[0] == 'amount due':
+                        inv['total'] = tds[1]
+            else:
+                usage = []
+                tb = section.tbody
+                for tr in tb.findAll('tr'):
+                    tds = tr.findAll('td')
+                    tds = map(lambda x: x.text.lower().strip(), tds)
+                    us = {}
+                    us['name'] = tds[0]
+                    us['quan'] = tds[1]
+                    us['cost'] = tds[2]
+                    usage.append(us)
+                name = section.h2.text
+                services[name] = usage
+
+        inv['services'] = services
+        inv['totals'] = totals
+        yield inv
+

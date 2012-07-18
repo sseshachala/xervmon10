@@ -42,6 +42,10 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         elif isinstance(item, SoftlayerUsage):
             item['account_id'] = self.account_id
             item['cloud_account_id'] = self.user_id
+            for spec in item['spec']:
+                service = spec['name']
+                if service and not service in spider.new_services:
+                    spider.new_services.append(service)
             obj = item.get_mongo_obj()
             self.susage.append(obj)
         return item

@@ -29,6 +29,7 @@ class HPCloudSpiderBase(BaseSpider):
         self.password = 'Java0man'
         self.close_down = False
         self.errors = []
+        self.invoices = []
         self.log = log
 
     def parse(self, response):
@@ -58,7 +59,7 @@ class HPCloudSpiderBase(BaseSpider):
             yield
         else:
            acc = HPCloudAccount()
-           acc.account_id = account_num.text
+           acc['account_id'] = account_num.text
            yield acc
 
         self.log.msg("Successfully logged in. Parsing now")

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 import pymongo
@@ -203,7 +202,7 @@ class BaseMongoDBPipeline(object):
             padded_text += enc.decrypt(dcode[start:start+block_size])
         password = padded_text.split('\x00', 1)[0]
         log.msg(password)
-        
+
         return password
 
 

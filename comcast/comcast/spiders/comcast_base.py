@@ -121,6 +121,7 @@ class ComcastSpiderBase(BaseSpider):
                     yield item
             else:
                 self.log.msg("No account block text")
+                self.errors.append("Error founding account entry on page")
             items = self.parse_comcast(browser)
             if items:
                 for item in items:

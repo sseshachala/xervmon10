@@ -24,6 +24,7 @@ class ComcastCurrentSpider(ComcastSpiderBase):
         soup = BeautifulSoup(source)
         block = soup.find('div', 'bill_details_container')
         if not block:
+            self.errors.append("No div with info found. Stop scraping. Possible login error")
             self.log.msg("No block found")
             return
         dates = block.find('span',

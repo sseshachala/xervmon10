@@ -48,7 +48,8 @@ ITEM_PIPELINES = [
         ]
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
-}
+        'basecrawler.extensions.FailLogger': 599
+        }
 URLS = dict(
     _BASE_URL = ('https://www.att.com/'),
     _LOGIN_URL = (

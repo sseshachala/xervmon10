@@ -47,6 +47,7 @@ ITEM_PIPELINES = [
 
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
+        'basecrawler.extensions.FailLogger': 599
 }
 
 URLS = dict(

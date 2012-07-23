@@ -36,12 +36,7 @@ class AwsSpiderBase(BaseSpider):
 
     def parse(self, response):
         if self.close_down:
-            raise CloseSpider('No user id')
-            return
-        if not self.username or not self.password:
-            self.close_down = True
-            self.log.msg("No credentials", level=log.ERROR)
-            raise CloseSpider('No credentials')
+            raise CloseSpider('Bad credentials')
             return
         resp = response.replace(body=re.sub('<!DOCTYPE(.*)>', '', response.body))
         return [FormRequest.from_response(resp, formname='signIn',
@@ -57,6 +52,7 @@ class AwsSpiderBase(BaseSpider):
         self.log.msg("Go to parsing")
         if error:
             self.log.msg("Error login")
+            self.errors.append('Error login %s' % error.text)
             self.close_down = True
             raise CloseSpider("bad login")
             yield
@@ -73,6 +69,7 @@ class AwsSpiderBase(BaseSpider):
             pass
         else:
             self.close_down = True
+            self.errors.append('Login error getting account_id')
             raise CloseSpider("bad login")
             yield
         yield Request(self._ACCOUNT_SUMMARY_URL, dont_filter=True, callback=self.parse_aws)

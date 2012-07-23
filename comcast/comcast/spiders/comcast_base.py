@@ -49,11 +49,8 @@ class ComcastSpiderBase(BaseSpider):
 
     def parse(self, response):
         if self.close_down:
+            self.errors.append('Bad credentials')
             raise CloseSpider('No user id')
-        if not self.username or not self.password:
-            self.close_down = True
-            self.log.msg("No credentials", level=log.ERROR)
-            raise CloseSpider('No credentials')
             return
         display = Display(visible=0, size=(800, 600))
         display.start()
@@ -87,6 +84,7 @@ class ComcastSpiderBase(BaseSpider):
                 self.log.msg('%s %s' % (status, captext))
                 browser.find_element_by_id('nucaptcha-answer').send_keys(captext)
                 if status == 'ERROR':
+                    self.errors.append("Captcha solve problem")
                     raise CloseSpider("Couldnt solve captcha. Error: %s" % captext)
                     return
             else:

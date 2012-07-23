@@ -53,6 +53,7 @@ ITEM_PIPELINES = [
         ]
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
+        'basecrawler.extensions.FailLogger': 599
 }
 
 MONGO_LOG = 'scrape_log'

@@ -48,6 +48,11 @@ class SoftlayerSpiderBase(BaseSpider):
         content = response.body
         soup = BeautifulSoup(content)
         error = soup.find("span", "error_message")
+        if error:
+            self.log.msg("Error login")
+            self.close_down = True
+            self.errors.append("Bad login %s" % error.text)
+            raise CloseSpider("bad login")
         try:
             self.account_id = re.findall("'accountId', '([0-9]+)'", content)[0]
             it = SoftlayerAccount()
@@ -55,15 +60,13 @@ class SoftlayerSpiderBase(BaseSpider):
             yield it
         except:
             self.close_down =True
+            self.errors.append('No account id')
             raise CloseSpider('No account id')
-        if error:
-            self.log.msg("Error login")
-            self.close_down = True
-            raise CloseSpider("bad login")
         self.log.msg("Go to parsing")
         acid = soup.find("div", id="userinfo")
         if not acid:
             self.close_down = True
+            self.errors.append("bad login")
             raise CloseSpider("bad login")
         yield Request(self._BILLING_URL, dont_filter=True,
                 callback=self.parse_softlayer)

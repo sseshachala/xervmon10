@@ -32,12 +32,8 @@ class TimewarnerSpiderBase(BaseSpider):
 
     def parse(self, response):
         if self.close_down:
+            self.errors.append("Bad credentials")
             raise CloseSpider('No user id')
-            return
-        if not self.username or not self.password:
-            self.close_down = True
-            self.log.msg("No credentials", level=log.ERROR)
-            raise CloseSpider('No credentials')
             return
 
         return [FormRequest.from_response(response, formname="form1",
@@ -52,8 +48,10 @@ class TimewarnerSpiderBase(BaseSpider):
         logname = soup.find('span', id="ctl00_lbUser")
         if not logname:
             if error:
+                self.errors.append("Bad login %s" % error.text)
                 self.log.msg(error.text)
             self.close_down = True
+            self.errors.append("Bad login cant find accountid")
             raise CloseSpider("bad login")
             yield
 

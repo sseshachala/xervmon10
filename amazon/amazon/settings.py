@@ -48,7 +48,8 @@ ITEM_PIPELINES = [
 
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
-}
+        'basecrawler.extensions.FailLogger': 599
+        }
 SERVICE_MAP = {
         "AWS Data Transfer (excluding Amazon CloudFront)": "transfer",
         "AWS Import/Export": "IngestionService",

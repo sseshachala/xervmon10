@@ -34,12 +34,8 @@ class HPCloudSpiderBase(BaseSpider):
 
     def parse(self, response):
         if self.close_down:
+            self.errors.append("Bad Credentials")
             raise CloseSpider('No user id')
-            return
-        if not self.username or not self.password:
-            self.close_down = True
-            self.log.msg("No credentials", level=log.ERROR)
-            raise CloseSpider('No credentials')
             return
 
         return [FormRequest.from_response(response, formnumber=0,
@@ -53,8 +49,10 @@ class HPCloudSpiderBase(BaseSpider):
         account_num = soup.find('span', id="aux-nax-account-id")
         if not account_num:
             if error:
+                self.errors.append("Bad login %s" % error.text)
                 self.log.msg(error.text)
             self.close_down = True
+            self.errors.append("Bad login cant find accountid")
             raise CloseSpider("bad login")
             yield
         else:

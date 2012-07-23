@@ -48,11 +48,8 @@ class AttSpiderBase(BaseSpider):
         br_cookies = dict([(b['name'], b['value']) for b in cookies])
 
         if self.close_down:
+            self.errors.append('Bad credentials')
             raise CloseSpider('No user id')
-        if not self.username or not self.password:
-            self.close_down = True
-            self.log.msg("No credentials", level=log.ERROR)
-            raise CloseSpider('No credentials')
         return Request(self._BILLS_URL, cookies=br_cookies,
                 callback=self.after_login)
 
@@ -66,6 +63,7 @@ class AttSpiderBase(BaseSpider):
             yield it
         except:
             self.close_down =True
+            self.errors.append('Login problem. Cant find accountid')
             raise CloseSpider('No account id')
         self.log.msg("Go to parsing")
         yield Request(self._BILLS_URL, cookies=response.request.cookies, dont_filter=True,

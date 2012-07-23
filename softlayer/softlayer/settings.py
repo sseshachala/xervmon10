@@ -32,7 +32,7 @@ KEY = 'yDo4V5B0j9V3JRJ4lO55q77Wm5r7dLC8'
 
 SENDER_EMAIL = 'sysadmin@hooduku.com'
 SENDER_PASSWORD = 'admin9873%man'
-RECEIVER_EMAIL = 'sudhi@hooduku.com'
+RECEIVER_EMAIL = ['sudhi@hooduku.com']
 SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = '587'
 MONGO_LOG = 'scrape_log'
@@ -48,6 +48,7 @@ ITEM_PIPELINES = [
 
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
+        'basecrawler.extensions.FailLogger': 599
 }
 URLS = dict(
     _BILLING_URL = "https://manage.softlayer.com/Administrative/accountSummary",

@@ -12,4 +12,4 @@ class ErrorDownloader(object):
     def process_exception(self, request, exception, spider):
         log.msg("PROCESS DOWNLOADER EXCEPTION")
         spider.errors.append(str(exception))
-        return []
+        return None

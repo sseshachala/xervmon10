@@ -36,6 +36,7 @@ class AwsSpiderBase(BaseSpider):
 
     def parse(self, response):
         if self.close_down:
+            self.errors.append("Bad credentials")
             raise CloseSpider('Bad credentials')
             return
         resp = response.replace(body=re.sub('<!DOCTYPE(.*)>', '', response.body))

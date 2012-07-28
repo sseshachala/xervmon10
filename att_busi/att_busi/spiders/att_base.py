@@ -106,8 +106,6 @@ class AttSpiderBase(BaseSpider):
                 time.sleep(1)
                 opt.click()
                 time.sleep(1)
-                sel.click()
-                time.sleep(1)
                 selfmt = browser.find_element_by_xpath(
                         '//select[@id="OUTPUTFMT"]')
                 tot = 0

@@ -40,7 +40,7 @@ class AttSpiderBase(BaseSpider):
         self.errors = []
         self.log = log
         self.pdf_folder = os.path.join('/tmp',
-                     'tmppdf')
+                     'tmppdf_att')
 
     def click_displayed(self, browser, cur, prev):
             tot = 0
@@ -69,7 +69,7 @@ class AttSpiderBase(BaseSpider):
         fp.set_preference("browser.download.manager.showWhenStarting",False)
         fp.set_preference("browser.download.dir", tmppdf)
         fp.set_preference("browser.helperApps.neverAsk.saveToDisk",
-            "application/pdf")
+            "application/csv, text/comma-separated-values, text/csv, application/octet-stream, text/plain")
         browser = webdriver.Firefox(firefox_profile=fp)
 
         try:
@@ -169,7 +169,6 @@ class AttSpiderBase(BaseSpider):
                 time.sleep(1)
                 first_tds = browser.find_elements_by_xpath(
                         '//div[@id="downloadDiv"]/table/tbody/tr[2]/td')
-                print first_tds[0].text
                 if first_tds[0].text == u'Charges and Credits Detail':
                     ltimes = 0
                     while ltimes < 5:
@@ -193,11 +192,13 @@ class AttSpiderBase(BaseSpider):
                             '//div[@id="downloadDiv"]/table/tbody/tr[2]/td')
                     if first_tds[3].text == u'COMPLETE':
                         first_tds[4].click()
-                        time.sleep(2)
+                        time.sleep(3)
                         it = self.parse_csv_report()
                         if it:
-                            print it.next()
-                            return it
+                            print it
+                            return browser
+                        else:
+                            print 'No lines'
 
         except Exception, e:
             print str(e)
@@ -212,12 +213,15 @@ class AttSpiderBase(BaseSpider):
     def parse_csv_report(self):
         files = os.listdir(self.pdf_folder)
         self.log.msg("files %s" % str(files))
+        lines = []
+        print files
         if files:
             csvread = csv.reader(open(os.path.join(self.pdf_folder,
                 files[0])))
-        for f in files:
-            os.remove(os.path.join(self.pdf_folder, f))
-            return csvread
+            lines = [l for l in csvread if l]
+        # for f in files:
+        #     os.remove(os.path.join(self.pdf_folder, f))
+        return lines
 
     def parse_report(self, content):
         # not working method. too much cases to handle

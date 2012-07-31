@@ -48,9 +48,9 @@ class AwsSpiderBase(BaseSpider):
             callback=self.after_login)]
 
     def after_login(self, response):
-        soup = BeautifulSoup(response.body)
+        content = re.sub('<!DOCTYPE(.*)>', '', response.body)
+        soup = BeautifulSoup(content)
         error = soup.find("div", id="message_error")
-        self.log.msg("Go to parsing")
         if error:
             self.log.msg("Error login")
             self.errors.append('Error login %s' % error.text)
@@ -73,6 +73,7 @@ class AwsSpiderBase(BaseSpider):
             self.errors.append('Login error getting account_id')
             raise CloseSpider("bad login")
             yield
+        self.log.msg("Go to parsing")
         yield Request(self._ACCOUNT_SUMMARY_URL, dont_filter=True, callback=self.parse_aws)
 
     def parse_aws(self, response):
@@ -132,6 +133,12 @@ class AwsSpiderBase(BaseSpider):
         except:
             datestr = None
         return datestr
+
+    def check_permission(self, response):
+        if response.url == 'https://portal.aws.amazon.com/gp/aws/401.html':
+            self.errors.append('Permission denied')
+            return False
+        return True
 
     def _parse_csv(self, response):
         csvdata = response.body

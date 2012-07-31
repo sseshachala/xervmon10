@@ -322,3 +322,7 @@ class AttSpiderBase(BaseSpider):
     def parse_att(self, response):
         """interface method for spider logic"""
         raise NotImplementedError("This method have to be overriden in derived class")
+
+if __name__ == '__main__':
+    a = AttSpiderBase()
+    a.parse(1)

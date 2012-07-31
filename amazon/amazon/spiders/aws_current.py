@@ -10,6 +10,10 @@ class AwsSpiderCurrent(AwsSpiderBase):
     name = 'aws_current'
 
     def parse_aws(self, response):
+        if not self.check_permission(response):
+            return
+            
+
         self.log.msg("started to parse items for %s" % self.name)
         now = datetime.datetime.now()
         dater = calendar.monthrange(now.year, now.month)

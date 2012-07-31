@@ -11,6 +11,8 @@ class AwsSpiderAll(AwsSpiderBase):
     name = 'aws_hist'
 
     def parse_aws(self, response):
+        if not self.check_permission(response):
+            return
         soup = BeautifulSoup(response.body)
         sel = soup.findAll("select")[1]
         opts = sel.findChildren()

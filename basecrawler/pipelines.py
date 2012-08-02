@@ -162,12 +162,12 @@ class BaseMongoDBPipeline(object):
 
     def run_more_spider(self, name):
         url = 'http://localhost:6800/schedule.json'
+        setting = ('USER_ID', 'MONGO_DB', 'MYSQL_DB')
         data = {
                 'project': settings.get('BOT_NAME'),
                 'spider': name,
-                'setting': 'USER_ID=%s' % self.user_id
                 }
-        req = urllib2.Request(url, urlencode(data))
+        req = urllib2.Request(url, urlencode(data) + '&' + '&'.join(map(lambda s:urlencode({'setting': '%s=%s' % (s, settings.get(s))}), setting)))
 
         try:
             res = urllib2.urlopen(req)

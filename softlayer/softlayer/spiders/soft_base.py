@@ -81,6 +81,10 @@ class SoftlayerSpiderBase(BaseSpider):
         invoice_id = meta['invoice_id']
         now = datetime.datetime.now()
         contents = data.body
+        search = re.search('You do not have permission to view the account summary.', contents)
+        if search:
+            self.errors.append("Permission Error")
+            return
         workbook = xlrd.open_workbook(file_contents=contents)
         detail_sheet = 'Detailed Billing'
         if (len(workbook.sheets()) < 2 or

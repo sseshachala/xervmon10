@@ -36,8 +36,11 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
         acc['account_id'] = curaccount.text
         yield acc
         self.log.msg("Cur account %s" % curaccount.text)
-        dates = soup.find('select',
-                id='ReportViewer2_ctl00_ctl03_ddValue').findAll('option')
+        datesel = soup.find('select',
+                id=re.compile('ReportViewer2(.*)ddValue'))
+        select_id = datesel.get('name')
+        dates = datesel.findAll('option')
+        self.log.msg('Select id is %s' % select_id)
         form = soup.find('form', id='form1')
         inps = form.findAll('input')
         formdata = {}
@@ -59,7 +62,7 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
             datval = dat.get('value')
             self.log.msg("Found invoice date %s with value %s" % (datmonth,
                 dat.get('value')))
-            formdata_it["ReportViewer2$ctl00$ctl03$ddValue"] = datval
+            formdata_it[select_id] = datval
             rargs = [response.url]
             rkwargs = dict(
                     formdata=formdata_it, callback=self.get_csv, meta={'month':
@@ -85,8 +88,11 @@ class TimewarnerHistorySpider(TimewarnerSpiderBase):
         self.log.msg("get csv file month %s" % meta['month'])
 
         import csv
+        from io import BytesIO
         csv_body = response.body
-        reader = csv.reader(csv_body.split('\r\n'))
+        csv_body = csv_body.replace('\0', '')
+        o = BytesIO(csv_body)
+        reader = csv.reader(o)
         lines = [l for l in reader]
         names = [l.strip() for l in lines[0]]
         if len(lines) < 2:

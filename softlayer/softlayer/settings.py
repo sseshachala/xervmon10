@@ -13,6 +13,8 @@ BOT_VERSION = '1.0'
 SPIDER_MODULES = ['softlayer.spiders']
 NEWSPIDER_MODULE = 'softlayer.spiders'
 
+DOWNLOAD_DELAY = 0.2
+
 
 
 ITEM_PIPELINES = [

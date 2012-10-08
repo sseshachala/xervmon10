@@ -122,8 +122,10 @@ class AwsSpiderBase(BaseSpider):
                 'periodType': 'hours',
                 'download-usage-report-csv': '1'
             }
+        meta['formdata'] = form_data
+        meta['url'] = response.url
         yield FormRequest.from_response(response,
-            formname='usageReportForm', formdata=form_data,
+            formname='usageReportForm', formdata=form_data, meta=meta,
             callback=self._parse_csv)
 
 
@@ -141,6 +143,9 @@ class AwsSpiderBase(BaseSpider):
         return True
 
     def _parse_csv(self, response):
+        meta = response.request.meta
+        if not self.check_permission(response):
+            return
         csvdata = response.body
         fp = StringIO(csvdata)
         c = csv.reader(fp)

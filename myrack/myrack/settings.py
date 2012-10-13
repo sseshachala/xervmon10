@@ -19,8 +19,6 @@ ITEM_PIPELINES = [
         'basecrawler.pipelines.StatusPipeline'
         ]
 
-SPIDER_MIDDLEWARES={}
-DOWNLOADER_MIDDLEWARES={}
 
 URLS = dict(
 

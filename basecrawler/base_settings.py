@@ -27,6 +27,12 @@ SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = '587'
 MONGO_LOG = 'scrape_log'
 
+XWEBSERVICE_HOST = 'crawler.xervmon.com'
+XWEBSERVICE_PORT = 5000
+XWEBSERVICE_USER = 'xervmon'
+XWEBSERVICE_PASSWD = 'xervmon_pass'
+XWEBSERVICE_PREDICT = True
+
 SPIDER_MIDDLEWARES = {
         'basecrawler.middlewares.ErrorsMiddleware': 100
         }
@@ -36,5 +42,6 @@ DOWNLOADER_MIDDLEWARES = {
         }
 EXTENSIONS = {
 	'scrapy.contrib.feedexport.FeedExporter': None,
-        'basecrawler.extensions.FailLogger': 599
+        'basecrawler.extensions.FailLogger': 599,
+        'basecrawler.extensions.XWebservice': 598
         }

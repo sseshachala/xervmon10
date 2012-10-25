@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+import os
 import pymongo
 import csv
 import datetime
@@ -35,6 +37,12 @@ def mongo_connect():
 MONGO_CONN = mongo_connect()
 
 class StatusPipeline(object):
+    friendly_errors = {
+            "login": 100001,
+            "permission": 100002,
+            "other": 100003
+            }
+
     def __init__(self):
         self.mongodb = MONGO_CONN
         self.user_id = settings.get('USER_ID')
@@ -44,6 +52,11 @@ class StatusPipeline(object):
         self.receiver_email = settings.get("RECEIVER_EMAIL")
         self.smtp_host = settings.get("SMTP_HOST")
         self.smtp_port = settings.get("SMTP_PORT")
+        self.job_id = self.get_jobid()
+        log.msg('job id %s' % self.job_id)
+
+    def get_jobid(self):
+        return os.environ.get('SCRAPY_JOB')
 
     def open_spider(self, spider):
         status = "Working"
@@ -58,6 +71,7 @@ class StatusPipeline(object):
         if spider.errors:
             status = 'Error'
             e = ' \n'.join(spider.errors)
+            log.msg(e)
         else:
             status = 'Success'
         self.log(status, cmd, e)
@@ -71,10 +85,19 @@ class StatusPipeline(object):
             user.login_status = status
             user.login_log = error
             self.session.commit()
-        self.mongodb[LOGCOL].remove({"cloud_account_id": self.user_id, "script": cmd, "added": { "$gt": prevday}})
-        self.mongodb[LOGCOL].insert({"cloud_account_id": self.user_id, "status": status, "traceback": error,
-            "script": cmd, "added": now})
 
+        friendly_msg = ""
+        if 'credentials' in error or 'login' in error or 'password' in error:
+            friendly_msg = self.friendly_errors["login"]
+        elif 'permission' in error:
+            friendly_msg = self.friendly_errors["permission"]
+        elif error:
+            friendly_msg = self.friendly_errors["other"]
+
+        logdoc = {"cloud_account_id": self.user_id, "status": status, "traceback": error,
+            "status_msg": friendly_msg, "job_id": self.job_id,
+            "script": cmd, "added": now}
+        self.mongodb[LOGCOL].update({"job_id": self.job_id}, logdoc, True)
 
     def email(self, status, cmd, e=''):
         if not self.user_id:
@@ -192,7 +215,10 @@ class BaseMongoDBPipeline(object):
             self.closeEngine += ("Couldn`t get mysql user. %s" % str(e))
             return None
         if user:
-            self.account_id = user.account_id
+            accid = user.account_id
+            if accid:
+                accid = accid.replace("-", "")
+            self.account_id = accid
             self.provider_id = user.cloud_provider
             try:
                 self.password = self._decrypt_password(user.password)

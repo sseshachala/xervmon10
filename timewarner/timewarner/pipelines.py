@@ -13,8 +13,6 @@ class MongoDBPipeline(BaseMongoDBPipeline):
     def __init__(self):
         super(MongoDBPipeline, self).__init__()
         # List of servers with info 
-        log.msg('host is')
-        log.msg(settings.get('MONGO_HOST'))
         self.account_id = None
         self.got_acid = False
         # From mongodb

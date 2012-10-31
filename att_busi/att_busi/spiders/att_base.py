@@ -57,8 +57,8 @@ class AttSpiderBase(BaseSpider):
         if self.close_down:
             self.errors.append('Bad credentials')
             raise CloseSpider('No user id')
-        display = Display(visible=0, size=(800, 600))
-        display.start()
+        # display = Display(visible=0, size=(800, 600))
+        # display.start()
 
         tmppdf = self.pdf_folder
         if not os.path.isdir(tmppdf):

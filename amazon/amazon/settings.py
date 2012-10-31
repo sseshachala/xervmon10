@@ -44,3 +44,5 @@ URLS = dict(
     IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/console'
 
         )
+
+from basecrawler.local_settings import *

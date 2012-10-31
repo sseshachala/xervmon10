@@ -13,7 +13,6 @@ BOT_VERSION = '1.0'
 SPIDER_MODULES = ['amazon.spiders']
 NEWSPIDER_MODULE = 'amazon.spiders'
 
-
 ITEM_PIPELINES = [
         'amazon.pipelines.MongoDBPipeline',
         'basecrawler.pipelines.StatusPipeline'
@@ -44,5 +43,3 @@ URLS = dict(
     IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/console'
 
         )
-
-from basecrawler.local_settings import *

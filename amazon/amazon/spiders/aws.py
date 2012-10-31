@@ -22,17 +22,26 @@ class AwsSpiderBase(BaseSpider):
     _urls = settings.get('URLS')
     if isinstance(_urls, dict):
         vars().update(_urls)
-    start_urls = [_ACCOUNT_SUMMARY_URL]
+    start_urls = []
 
     def __init__(self, *args, **kwargs):
         super(AwsSpiderBase, self).__init__(*args, **kwargs)
         self.account_id = None
         self.invoices = []
         self.close_down = False
+        self.iam = False
         self.username = None
         self.password = None
         self.errors = []
-        self.log = log
+
+    def start_requests(self):
+        if self.iam:
+            url = self.IAM_LOGIN_URL % self.account_id
+            self.log("IAM mode with starturl %s" % str(url))
+        else:
+            url = self._ACCOUNT_SUMMARY_URL
+        yield Request(url, callback=self.parse)
+
 
     def parse(self, response):
         if self.close_down:
@@ -41,6 +50,7 @@ class AwsSpiderBase(BaseSpider):
             return
         resp = response.replace(body=re.sub('<!DOCTYPE(.*)>', '', response.body))
         return [FormRequest.from_response(resp, formname='signIn',
+            dont_filter=True,
             formdata={
                 'email':self.username,
                 'password': self.password
@@ -52,8 +62,9 @@ class AwsSpiderBase(BaseSpider):
         soup = BeautifulSoup(content)
         error = soup.find("div", id="message_error")
         if error:
-            self.log.msg("Error login")
-            self.errors.append('Error login %s' % error.text)
+            err = ('Error login %s' % error.text)
+            self.log(err)
+            self.errors.append(err)
             self.close_down = True
             raise CloseSpider("bad login")
             yield
@@ -73,7 +84,7 @@ class AwsSpiderBase(BaseSpider):
             self.errors.append('Login error getting account_id')
             raise CloseSpider("bad login")
             yield
-        self.log.msg("Go to parsing")
+        self.log("Go to parsing")
         yield Request(self._ACCOUNT_SUMMARY_URL, dont_filter=True, callback=self.parse_aws)
 
     def parse_aws(self, response):
@@ -107,10 +118,11 @@ class AwsSpiderBase(BaseSpider):
 
     def get_report(self, response):
         meta = response.request.meta
-        if 'date_from' not in meta or 'date_to' not in meta:
+        item = meta['item']
+        if 'startdate' not in item or 'enddate' not in item:
             return
-        date_from = meta['date_from']
-        date_to = meta['date_to']
+        date_from = item['startdate']
+        date_to = item['enddate']
         form_data = {
                 'timePeriod': 'aws-portal-custom-date-range',
                 'startYear': str(date_from.year),
@@ -144,6 +156,7 @@ class AwsSpiderBase(BaseSpider):
     def _parse_csv(self, response):
         csvdata = response.body
         meta = response.request.meta
+        service_item = meta['item']
         fp = StringIO(csvdata)
         c = csv.reader(fp)
         header = c.next()
@@ -157,13 +170,11 @@ class AwsSpiderBase(BaseSpider):
                     # Before Jan 2011, downloaded files had 7
                     # columns, not 6.
                     row = row[:3] + row[4:]
-            item = AmazonUsage()
-            item['startdate'] = meta['date_from']
-            item['enddate'] = meta['date_to']
-            item['service'] = row[0]
+            item = {}
             item['operation'] = row[1]
             item['usagetype'] = row[2]
             item['starttime'] = self._parse_date(row[3])
             item['endtime'] = self._parse_date(row[4])
             item['usagevalue'] = row[5]
-            yield item
+            service_item['usage'].append(item)
+        yield service_item

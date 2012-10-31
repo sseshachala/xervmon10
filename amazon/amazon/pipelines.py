@@ -3,7 +3,7 @@
 import datetime
 from scrapy.conf import settings
 from scrapy import log
-from amazon.items import AmazonCharges, AmazonAccount, AmazonUsage
+from amazon.items import AmazonCharges, AmazonAccount, AmazonInvoice
 from basecrawler.pipelines import BaseMongoDBPipeline, Users
 
 
@@ -19,35 +19,23 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         self.old_usage = []
         self.old_charges = []
         self.iam = False
-        self.invoices = {}
+        self.invoices = []
+        self.cur_invoices = []
 
     def process_item(self, item, spider):
         if not self.got_acid and isinstance(item, AmazonAccount):
             self.account_id = item['account_id']
             self._update_account_id()
+
         elif isinstance(item, AmazonCharges):
             service_name = item['service']
             item['service'] = self.service_map.get(service_name, service_name)
             item['cloud_account_id'] = self.user_id
-            if not item['startdate'] in self.invoices:
-                self.invoices[item['startdate']] = dict(startdate=item['startdate'], enddate=item['enddate'], cloud_account_id=self.user_id, account=self.account_id, services={})
-            inv = self.invoices[item['startdate']]
-            if not item['service'] in inv['services']:
-                inv['services'][item['service']] = dict(usage=[], cost=None)
-            inv['services'][item['service']]['cost'] = item['cost']
+            item['account_id'] = self.account_id
+            item['iscurrent'] = False
             obj = item.get_mongo_obj()
-            self.acharges.append(obj)
-            if item['service'] and not item['service'] in spider.new_services:
-                spider.new_services.append(item['service'])
-        elif isinstance(item, AmazonUsage):
-            if not item['startdate'] in self.invoices:
-                self.invoices[item['startdate']] = dict(startdate=item['startdate'], enddate=item['enddate'], cloud_account_id=self.user_id, account=self.account_id, services={})
-            inv = self.invoices[item['startdate']]
-            if not item['service'] in inv['services']:
-                inv['services'][item['service']] = dict(usage=[], cost=None)
-            inv['services'][item['service']]['usage'].append(dict(type=item['usagetype'], value=item['usagevalue'], starttime=item['starttime'], endtime=item['endtime']))
-            obj = item.get_mongo_obj()
-            self.ausage.append(obj)
+            self.cur_invoices.append(obj)
+
         return item
 
     def open_spider(self, spider):
@@ -60,34 +48,46 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         spider.account_id = self.account_id
         spider.username = self.username
         spider.password = self.password
-        if spider.iam:
-            spider.start_urls = [spider.IAM_LOGIN_URL % self.account_id]
-            log.msg("IAM mode with starturl %s" % str(spider.start_urls))
-        fields = ['cloud_account_id', 'service', 'startdate', 'enddate']
-        self.ensure_index(AmazonCharges)
-        self.ensure_index(AmazonUsage)
-        invcurs = self.mongodb[AmazonCharges._collection_name].find(dict(cloud_account_id=self.user_id))
-        spider.invoices = []
-        for inv in invcurs:
-            if fields not in inv.keys():
-                continue
-            spider.invoices.append(dict([(k, inv[k]) for k in inv if k in fields]))
+        fields = ['cloud_account_id', 'startdate', 'enddate']
+        self.ensure_index(AmazonInvoice)
+        invcurs = self.mongodb[AmazonCharges._collection_name].find(
+                dict(cloud_account_id=self.user_id, iscurrent=False, account_id=self.account_id))
+        spider.invoices = [k['startdate'] for k in invcurs]
 
     def close_spider(self, spider):
         res = super(MongoDBPipeline, self).close_spider(spider)
         if not res:
             return
-        self._write_to_mongo(self.invoices.values(), 'amazonnew')
+        new_invoices = []
+        # for inv in self.cur_invoices:
+        #     invoice = AmazonInvoice()
+        #     invoice['services'] = self.cur_invoices[inv]
+        #     ex = invoice['services'][0]
+        #     invoice['startdate'] = ex['startdate']
+        #     invoice['enddate'] = ex['enddate']
+        #     invoice['cloud_account_id'] = self.user_id
+        #     invoice['account_id'] = self.account_id
+        #     invoice['iscurrent'] = False
+        #     invoice['cost'] = sum(map(lambda x: x['cost'],
+        #         invoice['services']))
+        #     new_invoices.append(invoice.get_mongo_obj())
+        new_invoices = self.cur_invoices
+        if not new_invoices:
+            return
+
         if spider.name == 'aws_current':
-            for it in self.acharges:
-                obj = it
-                self.mongodb[AmazonCharges._collection_name].update(dict([(o, obj[o]) for o in obj if o != 'cost']), obj, upsert=True)
-            for it in self.ausage:
-                obj = it
-                self.mongodb[AmazonUsage._collection_name].update(dict([(o, obj[o]) for o in obj if o != 'usagevalue']), obj, upsert=True)
+            invoices = []
+            for cur_invoice in new_invoices:
+                cur_invoice['iscurrent'] = True
+                invoices.append(cur_invoice)
+            self.mongodb[AmazonCharges._collection_name].remove(dict(
+                cloud_account_id=cur_invoice['cloud_account_id'],
+                account_id=cur_invoice['account_id'],
+                iscurrent=True
+                ))
+            self._write_to_mongo(invoices, AmazonCharges._collection_name)
         elif spider.name == 'aws_hist':
-            self._write_to_mongo(self.ausage, AmazonUsage._collection_name)
-            self._write_to_mongo(self.acharges, AmazonCharges._collection_name)
+            self._write_to_mongo(new_invoices, AmazonCharges._collection_name)
 
 
     def _get_credentials(self):

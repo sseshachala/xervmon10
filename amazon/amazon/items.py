@@ -10,14 +10,23 @@ class AmazonAccount(Item):
     account_id = Field()
 
 class AmazonCharges(MongoItem):
-    _collection_name = "amazonprices"
-    _mongo_keys = ['cloud_account_id', 'service', 'startdate', 'enddate', 'cost']
+    _collection_name = "amazon_new_prices"
+    _mongo_keys = [
+            "cloud_account_id",
+            "account_id",
+            'service',
+            'startdate',
+            'enddate',
+            'cost',
+            "iscurrent",
+            'usage',
+            ]
     link = Field()
     timestamp = Field()
 
 
 class AmazonUsage(Item):
-    _collection_name = "amazon"
+    _collection_name = "amazon_new"
     _mongo_keys = [
             "cloud_account_id",
             "service",
@@ -29,3 +38,15 @@ class AmazonUsage(Item):
             ]
 
     startdate = Field()
+
+class AmazonInvoice(MongoItem):
+    _collection_name = 'amazon_invoice_new'
+    _mongo_keys = [
+            "cloud_account_id",
+            "account_id",
+            "services",
+            "startdate",
+            "enddate",
+            "cost",
+            "iscurrent"
+            ]

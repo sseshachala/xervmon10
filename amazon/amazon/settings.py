@@ -13,7 +13,6 @@ BOT_VERSION = '1.0'
 SPIDER_MODULES = ['amazon.spiders']
 NEWSPIDER_MODULE = 'amazon.spiders'
 
-KEY = None
 ITEM_PIPELINES = [
         'amazon.pipelines.MongoDBPipeline',
         'basecrawler.pipelines.StatusPipeline'
@@ -46,7 +45,9 @@ URLS = dict(
         )
 DOWNLOADER_MIDDLEWARES = {}
 SPIDER_MIDDLEWARES = {}
-MYSQL_DB = 'devdb'
-MONGO_DB = 'devdb'
+MYSQL_USER = 'xervmon_user'
+MYSQL_PASSWORD = 'xervmon2763man'
+MYSQL_DB = 'xervmon_prod'
+MONGO_DB = 'xervmon_qa'
+USER_ID = '339'
 RECEIVER_EMAIL = 'snoopt@yandex.ru'
-KEY_ID=None

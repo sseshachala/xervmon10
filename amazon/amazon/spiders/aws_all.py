@@ -36,21 +36,23 @@ class AwsSpiderAll(AwsSpiderBase):
                         callback=self.parse_charges_page)
 
     def parse_charges_page(self, response):
-        items = self._parse_charges(response.body)
         meta = response.request.meta
         start_date = meta['sd']
         end_date = meta['ed']
+
+        if start_date in self.invoices:
+            self.log("Skipping invoice as already in base %s" % start_date)
+            return
+
+        items = self._parse_charges(response.body)
         for item in items:
-            if dict(cloud_account_id=self.user_id, service=item['service'], startdate=start_date, enddate=end_date) in self.invoices:
-                self.log.msg("Skipping invoice as already in base %s" % item)
-                continue
             item['startdate'] = start_date
             item['enddate'] = end_date
+            item['usage'] = []
             if item['link']:
                 yield Request(url=item['link'],
-                    meta={'date_from': start_date, 'date_to': end_date},
+                    meta={'item': item},
                     callback=self.get_report)
+                continue
             yield item
-
-
 

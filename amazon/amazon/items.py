@@ -4,27 +4,16 @@
 # http://doc.scrapy.org/topics/items.html
 
 from scrapy.item import Item, Field
+from basecrawler.items import MongoItem
 
 class AmazonAccount(Item):
     account_id = Field()
 
-class AmazonCharges(Item):
+class AmazonCharges(MongoItem):
     _collection_name = "amazonprices"
     _mongo_keys = ['cloud_account_id', 'service', 'startdate', 'enddate', 'cost']
-    service = Field()
-    cloud_account_id = Field()
-    cost = Field()
     link = Field()
     timestamp = Field()
-    startdate = Field()
-    enddate = Field()
-
-    def get_mongo_obj(self):
-        it = {}
-        for k in self._mongo_keys:
-            it[k] = self.get(k)
-        return it
-
 
 
 class AmazonUsage(Item):
@@ -39,16 +28,4 @@ class AmazonUsage(Item):
             "endtime"
             ]
 
-    service = Field()
-    operation = Field()
-    usagetype = Field()
-    cloud_account_id = Field()
-    starttime = Field()
-    endtime = Field()
-    usagevalue = Field()
-
-    def get_mongo_obj(self):
-        it = {}
-        for k in self._mongo_keys:
-            it[k] = self.get(k)
-        return it
+    startdate = Field()

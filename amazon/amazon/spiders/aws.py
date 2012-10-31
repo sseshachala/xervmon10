@@ -124,6 +124,7 @@ class AwsSpiderBase(BaseSpider):
             }
         yield FormRequest.from_response(response,
             formname='usageReportForm', formdata=form_data,
+            meta=meta,
             callback=self._parse_csv)
 
 
@@ -142,6 +143,7 @@ class AwsSpiderBase(BaseSpider):
 
     def _parse_csv(self, response):
         csvdata = response.body
+        meta = response.request.meta
         fp = StringIO(csvdata)
         c = csv.reader(fp)
         header = c.next()
@@ -156,6 +158,8 @@ class AwsSpiderBase(BaseSpider):
                     # columns, not 6.
                     row = row[:3] + row[4:]
             item = AmazonUsage()
+            item['startdate'] = meta['date_from']
+            item['enddate'] = meta['date_to']
             item['service'] = row[0]
             item['operation'] = row[1]
             item['usagetype'] = row[2]

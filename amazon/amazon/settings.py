@@ -13,7 +13,7 @@ BOT_VERSION = '1.0'
 SPIDER_MODULES = ['amazon.spiders']
 NEWSPIDER_MODULE = 'amazon.spiders'
 
-
+KEY = None
 ITEM_PIPELINES = [
         'amazon.pipelines.MongoDBPipeline',
         'basecrawler.pipelines.StatusPipeline'
@@ -44,3 +44,9 @@ URLS = dict(
     IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/console'
 
         )
+DOWNLOADER_MIDDLEWARES = {}
+SPIDER_MIDDLEWARES = {}
+MYSQL_DB = 'devdb'
+MONGO_DB = 'devdb'
+RECEIVER_EMAIL = 'snoopt@yandex.ru'
+KEY_ID=None

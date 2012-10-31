@@ -19,6 +19,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         self.old_usage = []
         self.old_charges = []
         self.iam = False
+        self.invoices = {}
 
     def process_item(self, item, spider):
         if not self.got_acid and isinstance(item, AmazonAccount):
@@ -28,12 +29,23 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             service_name = item['service']
             item['service'] = self.service_map.get(service_name, service_name)
             item['cloud_account_id'] = self.user_id
+            if not item['startdate'] in self.invoices:
+                self.invoices[item['startdate']] = dict(startdate=item['startdate'], enddate=item['enddate'], cloud_account_id=self.user_id, account=self.account_id, services={})
+            inv = self.invoices[item['startdate']]
+            if not item['service'] in inv['services']:
+                inv['services'][item['service']] = dict(usage=[], cost=None)
+            inv['services'][item['service']]['cost'] = item['cost']
             obj = item.get_mongo_obj()
             self.acharges.append(obj)
             if item['service'] and not item['service'] in spider.new_services:
                 spider.new_services.append(item['service'])
         elif isinstance(item, AmazonUsage):
-            item['cloud_account_id'] = self.user_id
+            if not item['startdate'] in self.invoices:
+                self.invoices[item['startdate']] = dict(startdate=item['startdate'], enddate=item['enddate'], cloud_account_id=self.user_id, account=self.account_id, services={})
+            inv = self.invoices[item['startdate']]
+            if not item['service'] in inv['services']:
+                inv['services'][item['service']] = dict(usage=[], cost=None)
+            inv['services'][item['service']]['usage'].append(dict(type=item['usagetype'], value=item['usagevalue'], starttime=item['starttime'], endtime=item['endtime']))
             obj = item.get_mongo_obj()
             self.ausage.append(obj)
         return item
@@ -65,6 +77,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         res = super(MongoDBPipeline, self).close_spider(spider)
         if not res:
             return
+        self._write_to_mongo(self.invoices.values(), 'amazonnew')
         if spider.name == 'aws_current':
             for it in self.acharges:
                 obj = it

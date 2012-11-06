@@ -48,8 +48,8 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         spider.account_id = self.account_id
         spider.username = self.username
         spider.password = self.password
-        fields = ['cloud_account_id', 'startdate', 'enddate']
-        self.ensure_index(AmazonInvoice)
+        fields = ['cloud_account_id', 'startdate', 'enddate', 'iscurrent', 'account_id']
+        self.ensure_index(AmazonCharges)
         invcurs = self.mongodb[AmazonCharges._collection_name].find(
                 dict(cloud_account_id=self.user_id, iscurrent=False, account_id=self.account_id))
         spider.invoices = [k['startdate'] for k in invcurs]

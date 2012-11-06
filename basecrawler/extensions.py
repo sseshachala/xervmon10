@@ -54,6 +54,7 @@ class XWebservice(object):
         return resp.read()
 
     def run_predict(self, spider):
+        spider.log("Closed signal got")
         user_id = self.user_id
         url = '/predict/start/%s/' % user_id
         self.open_url(url)

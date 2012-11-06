@@ -40,6 +40,6 @@ SERVICE_MAP = {
 
 URLS = dict(
     _ACCOUNT_SUMMARY_URL = "https://aws-portal.amazon.com/gp/aws/developer/account/index.html?ie=UTF8&action=activity-summary",
-    IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/console'
+    IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/'
 
         )

@@ -2,15 +2,15 @@ import urllib2
 from urlparse import urljoin
 
 from scrapy import signals
-from scrapy.xlib.pydispatch import dispatcher
 
 class FailLogger(object):
-    def __init__(self):
-        dispatcher.connect(self.spider_error, signal=signals.spider_error)
+    @classmethod
+    def from_crawler(cls, crawler):
+        ext = cls()
+        crawler.signals.connect(ext.spider_error, signal=signals.spider_error)
 
     def spider_error(self, failure, response, spider):
         spider.errors.append(failure.getTraceback())
-                
 
 class XWebservice(object):
     def __init__(self, host, port, user, password, user_id):
@@ -41,7 +41,7 @@ class XWebservice(object):
         ext = cls(host, port, user, password, user_id)
 
         if is_run_predict:
-            dispatcher.connect(ext.run_predict, signal=signals.spider_closed)
+            crawler.signals.connect(ext.run_predict, signal=signals.spider_closed)
         return ext
 
     def open_url(self, url_part):

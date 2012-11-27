@@ -25,6 +25,7 @@ class RackSpiderBase(BaseSpider):
         self.account_id = None
         self.username = None
         self.password = None
+        self.run_more = None
         self.close_down = False
         self.errors = []
         self.log = log
@@ -38,6 +39,23 @@ class RackSpiderBase(BaseSpider):
         return [FormRequest.from_response(response, formname="LoginForm",
             formdata={"username": self.username, "password": self.password},
             callback=self.after_login)]
+
+    def parse_billing_hist(self, response):
+        content = response.body
+        lines = content.split("\n")
+        for line in lines:
+            if re.match("\s*tableData0", line):
+                content = line
+        pattern = re.compile("ViewInvoice.do\?invoiceID=(\d+)")
+        invoice_ids = list(set(pattern.findall(content)))
+        invoice_list = []
+        for id in invoice_ids:
+            if id in self.old_invoices:
+                self.log.msg("Found invoice id %s in db. Skip parsing" % id)
+                continue
+            url = self._URL_INVOICE + str(id)
+            invoice_list.append(url)
+        return invoice_list
 
     def after_login(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))

@@ -121,7 +121,10 @@ class StatusPipeline(object):
         smail.starttls()
         smail.ehlo()
         smail.login(self.sender_email, self.sender_password)
-        smail.sendmail(self.sender_email, self.receiver_email, msg)
+        try:
+            smail.sendmail(self.sender_email, self.receiver_email, msg)
+        except Exception, e:
+            log.msg('Couldnt send email %s' % str(e))
         smail.quit()
 
 

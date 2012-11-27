@@ -17,20 +17,8 @@ class RackSpiderHistorical(RackSpiderBase):
         yield Request(self._URL_BILLING_HISTORY, callback=self.get_billing_hist)
 
     def get_billing_hist(self, response):
-        content = response.body
-        lines = content.split("\n")
-        for line in lines:
-            if re.match("\s*tableData0", line):
-                content = line
-        pattern = re.compile("ViewInvoice.do\?invoiceID=(\d+)")
-        invoice_ids = list(set(pattern.findall(content)))
-        invoice_list = []
-        invoice_data_list = []
-        for id in invoice_ids:
-            if id in self.old_invoices:
-                self.log.msg("Found invoice id %s in db. Skip parsing" % id)
-                continue
-            url = self._URL_INVOICE + str(id)
+        invoice_list = self.parse_billing_hist(response)
+        for url in invoice_list:
             yield Request(url, callback=self._parse_invoice)
 
     def _parse_invoice(self, response):

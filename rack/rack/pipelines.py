@@ -88,24 +88,6 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                         enddate={"$exists": True}
                     ))]
         spider.old_invoices = [i['invoice_id'] for i in old_invoices]
-        if spider.name != 'rack_current' or not spider.old_invoices:
-            return
-        filtered_inv = sorted(old_invoices, key=lambda k: k['enddate'],
-                reverse=True)
-        try:
-            last_inv = filtered_inv[0]
-        except IndexError:
-            last_inv = None
-        now = datetime.datetime.now()
-        if last_inv and isinstance(last_inv['enddate'], type(now)):
-            last_date = last_inv['enddate'] + relativedelta(months=+1)
-            if last_date < now:
-                log.msg("Date of last invoce more than a month")
-                self.run_more_spider('rack_hist')
-            else:
-                log.msg('Date of last invoice less than a month')
-        else:
-            log.msg("No hist invoice with date")
 
 
     def close_spider(self, spider):
@@ -114,6 +96,11 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             return
         rusage = []
         rservers = []
+        if spider.run_more:
+            try:
+                self.run_more_spider(spider.run_more)
+            except Exception, e:
+                log.msg("Couldn run more spider %s. Error %s" % (spider.run_more, str(e)))
         if spider.name == 'rack_current':
             self.mongodb[RackServers._collection_name].remove(dict(
                 cloud_account_id = self.user_id,

@@ -43,3 +43,5 @@ URLS = dict(
     IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/'
 
         )
+
+INVOICES_ANALYTICS = 'aws_invoice_data'

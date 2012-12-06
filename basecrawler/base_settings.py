@@ -20,10 +20,11 @@ USER_ID = None
 KEY = 'yDo4V5B0j9V3JRJ4lO55q77Wm5r7dLC8'
 CAPTCHA_KEY = '4fe73c77a83c95a2c6fe146c509dfe88'
 
-SENDER_EMAIL = 'sysadmin@hooduku.com'
-SENDER_PASSWORD = 'admin9873%man'
+SENDER_EMAIL = 'notify@notifications.xervmon.com'
+SENDER_USER = 'AKIAJLXYRBDZ3YXSJHDA'
+SENDER_PASSWORD = 'AkRmHVGk0OXJANkNLgZprrYnwHhbyI0Hi4NDqDMx9Fnb'
 RECEIVER_EMAIL = 'sudhi@hooduku.com'
-SMTP_HOST = 'smtp.gmail.com'
+SMTP_HOST = 'email-smtp.us-east-1.amazonaws.com'
 SMTP_PORT = '587'
 MONGO_LOG = 'scrape_log'
 

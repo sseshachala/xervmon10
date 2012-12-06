@@ -48,6 +48,7 @@ class StatusPipeline(object):
         self.user_id = settings.get('USER_ID')
         self.session = SESSION
         self.sender_email = settings.get("SENDER_EMAIL")
+        self.sender_user = settings.get("SENDER_USER")
         self.sender_password = settings.get("SENDER_PASSWORD")
         self.receiver_email = settings.get("RECEIVER_EMAIL")
         self.smtp_host = settings.get("SMTP_HOST")
@@ -120,7 +121,7 @@ class StatusPipeline(object):
         smail.ehlo()
         smail.starttls()
         smail.ehlo()
-        smail.login(self.sender_email, self.sender_password)
+        smail.login(self.sender_user, self.sender_password)
         try:
             smail.sendmail(self.sender_email, self.receiver_email, msg)
         except Exception, e:

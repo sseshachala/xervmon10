@@ -16,5 +16,6 @@ class IntermediaSpiderHistorical(IntermediaSpiderBase):
     name = "intermedia_hist"
 
     def parse_intermedia(self, response):
+        print 'parse starting'
         soup = BeautifulSoup(response.body)
         yield

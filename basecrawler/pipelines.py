@@ -29,7 +29,8 @@ Base.metadata.bind = engine
 LOGCOL = settings.get("MONGO_LOG")
 
 def mongo_connect():
-    MONGO_CONN = pymongo.Connection(settings.get('MONGO_HOST'))
+    MONGO_HOST = 'mongodb://%s:%s@%s:%s/%s' % tuple([settings.get(x) for x in ('MONGO_USER', 'MONGO_PASSWORD', 'MONGO_IP', 'MONGO_PORT', 'MONGO_DB')])
+    MONGO_CONN = pymongo.Connection(MONGO_HOST)
     MONGO_CONN = MONGO_CONN[settings['MONGO_DB']]
     MONGO_CONN.authenticate(settings['MONGO_USER'], settings['MONGO_PASSWORD'])
     return MONGO_CONN

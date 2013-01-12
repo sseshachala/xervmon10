@@ -107,9 +107,9 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                 account_id = unicode(self.account_id),
                 invoice_id = u""
                 ))
-            log.msg("Total usage data %s" %
-                    str(self.totalusage.get_mongo_obj()))
             if self.totalusage:
+                log.msg("Total usage data %s" %
+                    str(self.totalusage.get_mongo_obj()))
                 self.totalusage['usage'] = self.totalusagedata
                 self.totalusage['account_id'] = self.account_id
                 self._write_to_mongo([self.totalusage.get_mongo_obj()],

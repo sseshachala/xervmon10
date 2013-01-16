@@ -30,6 +30,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         elif isinstance(item, AmazonCharges):
             service_name = item['service']
             item['service'] = self.service_map.get(service_name, service_name)
+            spider.new_services.append(item['service'])
             item['cloud_account_id'] = self.user_id
             item['account_id'] = self.account_id
             item['iscurrent'] = False

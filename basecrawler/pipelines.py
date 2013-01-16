@@ -149,7 +149,8 @@ class BaseMongoDBPipeline(object):
         if hasattr(spider, 'new_services') and spider.new_services:
             cur_services = [s['name'] for s in self.mongodb[self.service_col].find(dict(id=self.provider_id))]
             now = datetime.datetime.now()
-            servic = [{'id': self.provider_id, 'name': s, 'date': now} for s in spider.new_services if not s in cur_services]
+            servic = [{'id': self.provider_id, 'name': s, 'date': now}
+                    for s in set(spider.new_services) if not s in cur_services]
             self._write_to_mongo(servic, self.service_col)
         return True
 

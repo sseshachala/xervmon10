@@ -35,3 +35,8 @@ URLS = dict(
     _URL_INVOICE = "/ViewInvoice.do?invoiceID=",
     _URL_API_KEY = "/APIAccess.do?_jajaxCall=revealApiAccessKey"
         )
+SPECIFIC_URLS = {
+        "https://manage.rackspacecloud.co.uk": {
+            "_URL_REPORTS": "/CloudFilesReports.do",
+            }
+        }

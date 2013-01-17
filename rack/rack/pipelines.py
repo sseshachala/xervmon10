@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import datetime
-import os.path
+from urlparse import urljoin
 from dateutil.relativedelta import relativedelta
 
 
@@ -94,8 +94,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         if not self.base_url:
             self.base_url = base_url
         for attr, url in urls.items():
-            setattr(spider, attr, os.path.join(self.base_url, url))
-        spider.start_url = spider._URL_LOGIN
+            setattr(spider, attr, urljoin(self.base_url, url))
 
 
     def close_spider(self, spider):

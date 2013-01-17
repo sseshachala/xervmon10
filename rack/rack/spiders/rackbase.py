@@ -15,6 +15,7 @@ from rack.items import *
 
 class RackSpiderBase(BaseSpider):
     _urls = settings.get('URLS')
+    _base_url = settings.get('BASE_URL')
 
 
     def __init__(self, *args, **kwargs):
@@ -24,12 +25,16 @@ class RackSpiderBase(BaseSpider):
         self.password = None
         self.run_more = None
         self.close_down = False
+        self.start_urls = []
         self.start_url = None
         self.errors = []
         self.log = log
 
     def start_requests(self):
-        return [Request(self.start_url, callback=self.parse)]
+        return [Request(self._base_url, callback=self.parse_first)]
+
+    def parse_first(self, response):
+        return Request(self._URL_LOGIN, callback=self.parse)
 
     def parse(self, response):
         if self.close_down:

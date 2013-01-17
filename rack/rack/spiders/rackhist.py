@@ -29,14 +29,14 @@ class RackSpiderHistorical(RackSpiderBase):
         invoice = soup.find('table', 'invoice')
         if not invoice:
             return
-        period = invoice.find(text=lambda x:"Coverage Period" in x)
+        first_head = invoice.find('ul', 'item-description-list').find('li')
+        period = re.findall('Coverage Period\s*: ([A-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-z]+ [0-9]{1,2}, [0-9]{4})', first_head.text)[0]
+        date_pattern = '%B %d, %Y'
         if period:
-            startt = " ".join(period.split()[:-4])
-            endt = " ".join(period.split()[-3:])
-            startinv = datetime.datetime.strptime(startt,
-                    "Coverage period: %b %d, %Y")
-            endinv = datetime.datetime.strptime(endt,
-                    "%b %d, %Y")
+            startt = period[0]
+            endt = period[1]
+            startinv = datetime.datetime.strptime(startt, date_pattern)
+            endinv = datetime.datetime.strptime(endt, date_pattern)
         try:
             invoice_id = invoice.find("div", "invoice-id").text
         except AttributeError:

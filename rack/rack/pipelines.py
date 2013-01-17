@@ -95,7 +95,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             self.base_url = base_url
         for attr, url in urls.items():
             setattr(spider, attr, os.path.join(self.base_url, url))
-        spider.start_urls = [spider._URL_LOGIN]
+        spider.start_url = spider._URL_LOGIN
 
 
     def close_spider(self, spider):

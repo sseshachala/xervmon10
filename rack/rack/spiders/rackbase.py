@@ -24,8 +24,12 @@ class RackSpiderBase(BaseSpider):
         self.password = None
         self.run_more = None
         self.close_down = False
+        self.start_url = None
         self.errors = []
         self.log = log
+
+    def start_requests(self):
+        return [Request(self.start_url, callback=self.parse)]
 
     def parse(self, response):
         if self.close_down:

@@ -91,7 +91,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         spider.old_invoices = [i['invoice_id'] for i in old_invoices]
         urls = settings.get('URLS')
         base_url = settings.get('BASE_URL')
-        if self.base_url is None:
+        if not self.base_url:
             self.base_url = base_url
         for attr, url in urls.items():
             setattr(spider, attr, os.path.join(self.base_url, url))

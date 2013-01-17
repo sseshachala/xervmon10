@@ -135,6 +135,9 @@ class BaseMongoDBPipeline(object):
         self.username = None
         self.passowrd = None
         self.provider_id = None
+        self.user = None
+        self.cloud_provider = None
+        self.base_url = None
         self.got_acid = False
         self.session = SESSION
         self.mongodb = MONGO_CONN
@@ -221,6 +224,10 @@ class BaseMongoDBPipeline(object):
             self.closeEngine += ("Couldn`t get mysql user. %s" % str(e))
             return None
         if user:
+            self.user = user
+            self.cloud_provider = self.session.query(
+                    CloudProviders).get(user.cloud_provider)
+            self.base_url = self.cloud_provider.starturl
             accid = user.account_id
             if accid:
                 accid = accid.replace("-", "")
@@ -275,5 +282,11 @@ class Users(Base):
 
     def __repr__(self):
         return "User(id=%d, name=%s, pass=%s)" % (self.id, self.account_user, self.password)
+
+
+class CloudProviders(Base):
+    __tablename__ = "cloud_providers"
+    __table_args__ = {"autoload": True}
+
 
 Base.metadata.create_all(engine)

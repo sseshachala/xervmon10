@@ -88,6 +88,12 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                         enddate={"$exists": True}
                     ))]
         spider.old_invoices = [i['invoice_id'] for i in old_invoices]
+        urls = settings.get('URLS')
+        base_url = settings.get('BASE_URL')
+        if self.base_url is None:
+            self.base_url = base_url
+        for attr, url in urls.items():
+            setattr(spider, attr, os.path.join(self.base_url, url))
 
 
     def close_spider(self, spider):
@@ -123,7 +129,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                 serv['account_id'] = self.account_id
                 serv['server_info'] = server_info
                 rservers.append(serv.get_mongo_obj())
-	    self._write_to_mongo(rservers, RackServers._collection_name)
+            self._write_to_mongo(rservers, RackServers._collection_name)
         if spider.name == 'rack_hist':
             rackinv = []
             rackusage = []
@@ -188,6 +194,7 @@ class UserStorage(Base):
 class UserCloud(Base):
     __tablename__ = "user_cloud_providers"
     __table_args__ = {"autoload": True}
+
 
 
 Base.metadata.create_all(engine)

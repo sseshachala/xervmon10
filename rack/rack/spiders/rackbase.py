@@ -15,9 +15,6 @@ from rack.items import *
 
 class RackSpiderBase(BaseSpider):
     _urls = settings.get('URLS')
-    if isinstance(_urls, dict):
-        vars().update(_urls)
-    start_urls = [_URL_LOGIN]
 
 
     def __init__(self, *args, **kwargs):

@@ -51,6 +51,8 @@ class HPCloudHistorySpider(HPCloudSpiderBase):
         for section in sections:
             if section.get('id') == u'invoice_totals':
                 tb = section.tbody
+                if not tb:
+                    continue
                 for tr in tb.findAll('tr'):
                     tds = tr.findAll('td')
                     tds = map(lambda x: x.text.lower().strip(), tds)
@@ -67,6 +69,8 @@ class HPCloudHistorySpider(HPCloudSpiderBase):
             else:
                 usage = []
                 tb = section.tbody
+                if not tb:
+                    continue
                 for tr in tb.findAll('tr'):
                     tds = tr.findAll('td')
                     tds = map(lambda x: x.text.lower().strip(), tds)

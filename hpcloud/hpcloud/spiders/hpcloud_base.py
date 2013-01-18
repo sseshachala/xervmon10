@@ -46,18 +46,24 @@ class HPCloudSpiderBase(BaseSpider):
     def after_login(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
         error = soup.find("ul", "message-alert")
-        account_num = soup.find('span', id="aux-nax-account-id")
+        if error:
+            self.errors.append("Bad login %s" % error.text)
+            self.log.msg(error.text)
+            raise CloseSpider("bad login")
+            yield
+        yield Request(self._BILLS_URL, callback=self.account_page_parse)
+
+    def account_page_parse(self, response):
+        soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
+        account_num = soup.find('b', id="accountId")
         if not account_num:
-            if error:
-                self.errors.append("Bad login %s" % error.text)
-                self.log.msg(error.text)
             self.close_down = True
             self.errors.append("Bad login cant find accountid")
             raise CloseSpider("bad login")
             yield
         else:
            acc = HPCloudAccount()
-           acc['account_id'] = account_num.text
+           acc['account_id'] = account_num.text.strip()
            yield acc
 
         self.log.msg("Successfully logged in. Parsing now")

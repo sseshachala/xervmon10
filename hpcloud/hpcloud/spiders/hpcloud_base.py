@@ -25,8 +25,6 @@ class HPCloudSpiderBase(BaseSpider):
         self.account_id = None
         self.username = None
         self.password = None
-        self.username = 'sudhi@hooduku.com'
-        self.password = 'Java0man'
         self.close_down = False
         self.errors = []
         self.invoices = []
@@ -39,7 +37,7 @@ class HPCloudSpiderBase(BaseSpider):
             return
 
         return [FormRequest.from_response(response, formnumber=0,
-            formdata={"user[email]": self.username, "user[password]": self.password,
+            formdata={"user[username]": self.username, "user[password]": self.password,
                 },
             callback=self.after_login)]
 

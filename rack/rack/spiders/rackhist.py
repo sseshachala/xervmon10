@@ -2,7 +2,7 @@
 import re
 import datetime
 import demjson
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 from scrapy.http import Request
 
@@ -29,9 +29,11 @@ class RackSpiderHistorical(RackSpiderBase):
         invoice = soup.find('table', 'invoice')
         if not invoice:
             return
-        first_head = invoice.find('ul', 'item-description-list').find('li')
-        period = re.findall('Coverage Period\s*: ([A-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-z]+ [0-9]{1,2}, [0-9]{4})', first_head.text)[0]
-        date_pattern = '%B %d, %Y'
+        pattern = 'Coverage Period\s*: ([A-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-z]+ [0-9]{1,2}, [0-9]{4})'
+        first_head = invoice.find('ul', 'item-description-list').find('li', text=re.compile(pattern))
+        period = re.findall(pattern, first_head.text)
+        period = period[0]
+        date_pattern = '%b %d, %Y'
         if period:
             startt = period[0]
             endt = period[1]

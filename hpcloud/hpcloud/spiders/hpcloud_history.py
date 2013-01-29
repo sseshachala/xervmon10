@@ -20,6 +20,22 @@ class HPCloudHistorySpider(HPCloudSpiderBase):
 
     def parse_hpcloud(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
+        year_select = soup.find('select', id='billing_year')
+        try:
+            options = year_select.findAll('option')
+        except AttributeError:
+            options = None
+        if options is None or len(options) == 1:
+            return self.parse_list_page(response)
+        else:
+            for option in options:
+                href = option['value']
+                yield Request(urlparse.urljoin(response.url, href),
+                        dont_filter=True, callback=self.parse_list_page)
+
+
+    def parse_list_page(self, response):
+        soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
         inv_table = soup.find('table', 'table_data')
         inv_links = inv_table.findAll('a', id=re.compile("invoiceDate"))
         log.msg(str(inv_links))

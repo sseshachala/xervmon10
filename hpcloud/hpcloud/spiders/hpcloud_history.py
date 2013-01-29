@@ -26,7 +26,7 @@ class HPCloudHistorySpider(HPCloudSpiderBase):
         except AttributeError:
             options = None
         if options is None or len(options) == 1:
-            return self.parse_list_page(response)
+            yield self.parse_list_page(response)
         else:
             for option in options:
                 href = option['value']

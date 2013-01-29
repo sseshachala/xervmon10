@@ -48,7 +48,7 @@ class HPCloudHistorySpider(HPCloudSpiderBase):
     def parse_invoice(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
         inv = HPCloudData()
-        content = soup.find('div', id='content')
+        content = soup.find('section', id='content')
         header = content.header
         dat = header.findAll('strong')
         log.msg(dat)

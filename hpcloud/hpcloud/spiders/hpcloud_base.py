@@ -53,7 +53,7 @@ class HPCloudSpiderBase(BaseSpider):
 
     def account_page_parse(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))
-        account_num = soup.find('b', id="accountId")
+        account_num = soup.find('span', id="accountId")
         if not account_num:
             self.close_down = True
             self.errors.append("Bad login cant find accountid")

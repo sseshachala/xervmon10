@@ -15,9 +15,7 @@ from rack.items import *
 
 class RackSpiderBase(BaseSpider):
     _urls = settings.get('URLS')
-    if isinstance(_urls, dict):
-        vars().update(_urls)
-    start_urls = [_URL_LOGIN]
+    _base_url = settings.get('BASE_URL')
 
 
     def __init__(self, *args, **kwargs):
@@ -25,9 +23,18 @@ class RackSpiderBase(BaseSpider):
         self.account_id = None
         self.username = None
         self.password = None
+        self.run_more = None
         self.close_down = False
+        self.start_urls = []
+        self.start_url = None
         self.errors = []
         self.log = log
+
+    def start_requests(self):
+        return [Request(self._base_url, callback=self.parse_first)]
+
+    def parse_first(self, response):
+        return Request(self._URL_LOGIN, callback=self.parse)
 
     def parse(self, response):
         if self.close_down:
@@ -38,6 +45,23 @@ class RackSpiderBase(BaseSpider):
         return [FormRequest.from_response(response, formname="LoginForm",
             formdata={"username": self.username, "password": self.password},
             callback=self.after_login)]
+
+    def parse_billing_hist(self, response):
+        content = response.body
+        lines = content.split("\n")
+        for line in lines:
+            if re.match("\s*tableData0", line):
+                content = line
+        pattern = re.compile("ViewInvoice.do\?invoiceID=(\d+)")
+        invoice_ids = list(set(pattern.findall(content)))
+        invoice_list = []
+        for id in invoice_ids:
+            if id in self.old_invoices:
+                self.log.msg("Found invoice id %s in db. Skip parsing" % id)
+                continue
+            url = self._URL_INVOICE + str(id)
+            invoice_list.append(url)
+        return invoice_list
 
     def after_login(self, response):
         soup = BeautifulSoup(re.sub('<html.*>', "<html>", response.body))

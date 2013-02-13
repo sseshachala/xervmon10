@@ -20,18 +20,23 @@ ITEM_PIPELINES = [
         ]
 
 
+BASE_URL = "https://manage.rackspacecloud.com"
 URLS = dict(
 
-    _URL_LOGIN = "https://manage.rackspacecloud.com/pages/Login.jsp",
-    _URL_SERVERS = "https://manage.rackspacecloud.com/CloudServers/ServerList.do",
-    _URL_REPORTS = "https://manage.rackspacecloud.com/ReportsHome.do",
-    _URL_BILLING = "https://manage.rackspacecloud.com/BillingOverview.do",
-    _URL_CURRENT_PRICE = "https://manage.rackspacecloud.com/CurrentInvoice.do",
-    _URL_BILLING_HISTORY = "https://manage.rackspacecloud.com/BillingHistory.do",
-    _URL_CLOUDFILES_CUR = "https://manage.rackspacecloud.com/CloudFiles/UsageTable.do",
-    _URL_LOADBALANCERS_CUR = "https://manage.rackspacecloud.com/LoadBalancers/UsageTable.do",
-    _URL_CLOUDSERVERS_CUR = "https://manage.rackspacecloud.com/CloudServers/UsageTable.do",
-    _URL_INVOICE = "https://manage.rackspacecloud.com/ViewInvoice.do?invoiceID=",
-    _URL_API_KEY = "https://manage.rackspacecloud.com/APIAccess.do?_jajaxCall=revealApiAccessKey"
-
+    _URL_LOGIN = "/pages/Login.jsp",
+    _URL_SERVERS = "/CloudServers/ServerList.do",
+    _URL_REPORTS = "/ReportsHome.do",
+    _URL_BILLING = "/BillingOverview.do",
+    _URL_CURRENT_PRICE = "/CurrentInvoice.do",
+    _URL_BILLING_HISTORY = "/BillingHistory.do",
+    _URL_CLOUDFILES_CUR = "/CloudFiles/UsageTable.do",
+    _URL_LOADBALANCERS_CUR = "/LoadBalancers/UsageTable.do",
+    _URL_CLOUDSERVERS_CUR = "/CloudServers/UsageTable.do",
+    _URL_INVOICE = "/ViewInvoice.do?invoiceID=",
+    _URL_API_KEY = "/APIAccess.do?_jajaxCall=revealApiAccessKey"
         )
+SPECIFIC_URLS = {
+        "https://manage.rackspacecloud.co.uk": {
+            "_URL_REPORTS": "/CloudFilesReports.do",
+            }
+        }

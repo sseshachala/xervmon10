@@ -17,7 +17,14 @@ class RackSpiderCurrrent(RackSpiderBase):
         yield Request(self._URL_SERVERS, callback=self.get_servers)
         yield Request(self._URL_API_KEY, callback=self.get_api_key)
         yield Request(self._URL_REPORTS, callback=self.get_reports)
+        yield Request(self._URL_BILLING_HISTORY, callback=self.check_new_invoices)
 
+
+    def check_new_invoices(self, response):
+        invoice_list = self.parse_billing_hist(response)
+        if len(invoice_list):
+            self.run_more = 'rack_hist'
+            self.log.msg('Found new invoice. Will run rack_hist')
 
     def get_reports(self, response):
         content = response.body

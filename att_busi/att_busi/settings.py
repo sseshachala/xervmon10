@@ -14,14 +14,20 @@ SPIDER_MODULES = ['att_busi.spiders']
 NEWSPIDER_MODULE = 'att_busi.spiders'
 
 DOWNLOAD_DELAY = 1
+RECEIVER_EMAIL = 'snoopt@yandex.ru'
 
 
 ITEM_PIPELINES = [
-        # 'att.pipelines.MongoDBPipeline',
+        #'att_busi.pipelines.MongoDBPipeline',
         # 'basecrawler.pipelines.StatusPipeline'
         ]
 MIDDLEWARES = {}
 DOWNLOADER_MIDDLEWARES = {}
+SPIDER_MIDDLEWARES = {
+        }
+EXTENSIONS = {
+	'scrapy.contrib.feedexport.FeedExporter': None,
+        }
 URLS = dict(
     _LOGIN_URL = (
         'https://www.businessdirect.att.com/portal/index.jsp'),

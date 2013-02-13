@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import datetime
+from urlparse import urljoin
 from dateutil.relativedelta import relativedelta
 
 
@@ -88,24 +89,17 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                         enddate={"$exists": True}
                     ))]
         spider.old_invoices = [i['invoice_id'] for i in old_invoices]
-        if spider.name != 'rack_current' or not spider.old_invoices:
-            return
-        filtered_inv = sorted(old_invoices, key=lambda k: k['enddate'],
-                reverse=True)
-        try:
-            last_inv = filtered_inv[0]
-        except IndexError:
-            last_inv = None
-        now = datetime.datetime.now()
-        if last_inv and isinstance(last_inv['enddate'], type(now)):
-            last_date = last_inv['enddate'] + relativedelta(months=+1)
-            if last_date < now:
-                log.msg("Date of last invoce more than a month")
-                self.run_more_spider('rack_hist')
-            else:
-                log.msg('Date of last invoice less than a month')
-        else:
-            log.msg("No hist invoice with date")
+        urls = settings.get('URLS')
+        base_url = settings.get('BASE_URL')
+        specific_urls = settings.get("SPECIFIC_URLS")
+        if not self.base_url:
+            self.base_url = base_url
+
+        specific_url = specific_urls.get(self.base_url, {})
+        for attr, url in urls.items():
+            if attr in specific_url:
+                url = specific_url[attr]
+            setattr(spider, attr, urljoin(self.base_url, url))
 
 
     def close_spider(self, spider):
@@ -114,15 +108,20 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             return
         rusage = []
         rservers = []
+        if spider.run_more:
+            try:
+                self.run_more_spider(spider.run_more)
+            except Exception, e:
+                log.msg("Couldn run more spider %s. Error %s" % (spider.run_more, str(e)))
         if spider.name == 'rack_current':
             self.mongodb[RackServers._collection_name].remove(dict(
                 cloud_account_id = self.user_id,
                 account_id = unicode(self.account_id),
                 invoice_id = u""
                 ))
-            log.msg("Total usage data %s" %
-                    str(self.totalusage.get_mongo_obj()))
             if self.totalusage:
+                log.msg("Total usage data %s" %
+                    str(self.totalusage.get_mongo_obj()))
                 self.totalusage['usage'] = self.totalusagedata
                 self.totalusage['account_id'] = self.account_id
                 self._write_to_mongo([self.totalusage.get_mongo_obj()],
@@ -136,7 +135,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                 serv['account_id'] = self.account_id
                 serv['server_info'] = server_info
                 rservers.append(serv.get_mongo_obj())
-	    self._write_to_mongo(rservers, RackServers._collection_name)
+            self._write_to_mongo(rservers, RackServers._collection_name)
         if spider.name == 'rack_hist':
             rackinv = []
             rackusage = []
@@ -201,6 +200,7 @@ class UserStorage(Base):
 class UserCloud(Base):
     __tablename__ = "user_cloud_providers"
     __table_args__ = {"autoload": True}
+
 
 
 Base.metadata.create_all(engine)

@@ -43,11 +43,5 @@ URLS = dict(
     IAM_LOGIN_URL = 'https://%s.signin.aws.amazon.com/console'
 
         )
-DOWNLOADER_MIDDLEWARES = {}
-SPIDER_MIDDLEWARES = {}
-MYSQL_USER = 'xervmon_user'
-MYSQL_PASSWORD = 'xervmon2763man'
-MYSQL_DB = 'xervmon_prod'
-MONGO_DB = 'xervmon_qa'
-USER_ID = '339'
-RECEIVER_EMAIL = 'snoopt@yandex.ru'
+
+INVOICES_ANALYTICS = 'aws_invoice_data'

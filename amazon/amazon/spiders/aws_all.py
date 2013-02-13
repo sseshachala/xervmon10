@@ -50,6 +50,8 @@ class AwsSpiderAll(AwsSpiderBase):
             item['enddate'] = end_date
             item['usage'] = []
             if item['link']:
+                if item['link'] == 'https://aws.amazon.com/premiumsupport/signup/':
+                    continue
                 yield Request(url=item['link'],
                     meta={'item': item},
                     callback=self.get_report)

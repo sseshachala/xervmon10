@@ -48,7 +48,20 @@ class AwsSpiderBase(BaseSpider):
             self.errors.append("Bad credentials")
             raise CloseSpider('Bad credentials')
             return
+        meta = response.meta
+        if self.iam and meta.get('first_request', True):
+            meta.update(first_request=False)
+            return Request(self._ACCOUNT_SUMMARY_URL, meta=meta, callback=self.parse)
         resp = response.replace(body=re.sub('<!DOCTYPE(.*)>', '', response.body))
+        soup = BeautifulSoup(resp.body)
+        acid = soup.find("span", attrs={"class": "txtxxsm"})
+        m = None
+        if acid:
+            acid_txt = "".join(acid.findAll(text=True)).strip()
+            m = re.search("Account Number ([0-9]{4}-[0-9]{4}-[0-9]{4})", acid_txt)
+        if m and len(m.groups()):
+            self.log('Got inside without login')
+            return Request(self._ACCOUNT_SUMMARY_URL, dont_filter=True, callback=self.parse_aws)
         return [FormRequest.from_response(resp, formname='signIn',
             dont_filter=True,
             formdata={
@@ -134,6 +147,8 @@ class AwsSpiderBase(BaseSpider):
                 'periodType': 'hours',
                 'download-usage-report-csv': '1'
             }
+        meta['formdata'] = form_data
+        meta['url'] = response.url
         yield FormRequest.from_response(response,
             formname='usageReportForm', formdata=form_data,
             meta=meta,
@@ -154,6 +169,9 @@ class AwsSpiderBase(BaseSpider):
         return True
 
     def _parse_csv(self, response):
+        meta = response.request.meta
+        if not self.check_permission(response):
+            return
         csvdata = response.body
         meta = response.request.meta
         service_item = meta['item']

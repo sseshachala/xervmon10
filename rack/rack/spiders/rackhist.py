@@ -2,7 +2,7 @@
 import re
 import datetime
 import demjson
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 from scrapy.http import Request
 
@@ -17,20 +17,8 @@ class RackSpiderHistorical(RackSpiderBase):
         yield Request(self._URL_BILLING_HISTORY, callback=self.get_billing_hist)
 
     def get_billing_hist(self, response):
-        content = response.body
-        lines = content.split("\n")
-        for line in lines:
-            if re.match("\s*tableData0", line):
-                content = line
-        pattern = re.compile("ViewInvoice.do\?invoiceID=(\d+)")
-        invoice_ids = list(set(pattern.findall(content)))
-        invoice_list = []
-        invoice_data_list = []
-        for id in invoice_ids:
-            if id in self.old_invoices:
-                self.log.msg("Found invoice id %s in db. Skip parsing" % id)
-                continue
-            url = self._URL_INVOICE + str(id)
+        invoice_list = self.parse_billing_hist(response)
+        for url in invoice_list:
             yield Request(url, callback=self._parse_invoice)
 
     def _parse_invoice(self, response):
@@ -41,14 +29,16 @@ class RackSpiderHistorical(RackSpiderBase):
         invoice = soup.find('table', 'invoice')
         if not invoice:
             return
-        period = invoice.find(text=lambda x:"Coverage Period" in x)
+        pattern = 'Coverage Period\s*: ([A-z]+ [0-9]{1,2}, [0-9]{4}) to ([A-z]+ [0-9]{1,2}, [0-9]{4})'
+        first_head = invoice.find('ul', 'item-description-list').find('li', text=re.compile(pattern))
+        period = re.findall(pattern, first_head.text)
+        period = period[0]
+        date_pattern = '%b %d, %Y'
         if period:
-            startt = " ".join(period.split()[:-4])
-            endt = " ".join(period.split()[-3:])
-            startinv = datetime.datetime.strptime(startt,
-                    "Coverage period: %b %d, %Y")
-            endinv = datetime.datetime.strptime(endt,
-                    "%b %d, %Y")
+            startt = period[0]
+            endt = period[1]
+            startinv = datetime.datetime.strptime(startt, date_pattern)
+            endinv = datetime.datetime.strptime(endt, date_pattern)
         try:
             invoice_id = invoice.find("div", "invoice-id").text
         except AttributeError:

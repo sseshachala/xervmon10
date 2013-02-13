@@ -32,6 +32,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
 
         return item
     def close_spider(self, spider):
+        log.msg(str(spider.errors))
         res = super(MongoDBPipeline, self).close_spider(spider)
         if not res:
             return

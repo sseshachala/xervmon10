@@ -49,8 +49,8 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         spider.account_id = self.account_id
         spider.username = self.username
         spider.password = self.password
-        fields = ['cloud_account_id', 'startdate', 'enddate']
-        self.ensure_index(AmazonInvoice)
+        fields = ['cloud_account_id', 'startdate', 'enddate', 'iscurrent', 'account_id']
+        self.ensure_index(AmazonCharges)
         invcurs = self.mongodb[AmazonCharges._collection_name].find(
                 dict(cloud_account_id=self.user_id, iscurrent=False, account_id=self.account_id))
         spider.invoices = [k['startdate'] for k in invcurs]
@@ -78,8 +78,10 @@ class MongoDBPipeline(BaseMongoDBPipeline):
 
         if spider.name == 'aws_current':
             invoices = []
+            now = datetime.datetime.now()
             for cur_invoice in new_invoices:
                 cur_invoice['iscurrent'] = True
+                cur_invoice['added'] = now
                 invoices.append(cur_invoice)
             self.mongodb[AmazonCharges._collection_name].remove(dict(
                 cloud_account_id=cur_invoice['cloud_account_id'],
@@ -87,6 +89,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
                 iscurrent=True
                 ))
             self._write_to_mongo(invoices, AmazonCharges._collection_name)
+            self._write_to_mongo(invoices, settings['INVOICES_ANALYTICS'])
         elif spider.name == 'aws_hist':
             self._write_to_mongo(new_invoices, AmazonCharges._collection_name)
 

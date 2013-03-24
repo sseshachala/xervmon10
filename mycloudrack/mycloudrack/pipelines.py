@@ -65,7 +65,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         item['last_updated'] = datetime.datetime.now()
         item['services'] = []
         for name, total in self.services.items():
-            item.append({
+            item['services'].append({
                 'name': name,
                 'total_number': total
                 })

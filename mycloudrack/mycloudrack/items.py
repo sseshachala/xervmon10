@@ -7,7 +7,7 @@ class RackAccount(Item):
 
 class RackService(Item):
     name = Field()
-    total_number = Field()
+    number = Field()
 
 
 class RackCurrent(MongoItem):

@@ -7,6 +7,7 @@ from scrapy.contrib.spiders import CrawlSpider, Rule
 
 from scrapy.http import FormRequest, Request
 from scrapy.utils.response import open_in_browser
+from scrapy import log
 import urlparse
 import datetime
 import pprint
@@ -73,7 +74,8 @@ class Hpcloud2Spider(CrawlSpider):
         self.close_down = False
         self.errors = []
         self.invoices = []
-        self.log = False
+        self.log = log
+        log.msg("hpcloud2 started")
 
     def parse(self, response):
         hxs = HtmlXPathSelector(response)
@@ -105,8 +107,6 @@ class Hpcloud2Spider(CrawlSpider):
 
         for refs in allrefs:
             href = refs.select('@href').extract()[0]
-            #print "extract data=", href
-            #print "extract text=", refs.select('text()').extract()
             yield Request(url=urlparse.urljoin(self.start_urls[0], href), callback=self.parse_bill)
 
     def parse_bill(self, response):
@@ -125,7 +125,9 @@ class Hpcloud2Spider(CrawlSpider):
         enddate = slist[1]
         inv['enddate'] = datetime.datetime.strptime(enddate.extract(), templ)
         inv['invoice_number'] = slist[2].extract()
-
+        if inv['invoice_number'] in self.invoices:
+            log.msg("Skipping. Invoice number " + inv['invoice_number'] + " already in db")
+            return
         tlist = hxs.select('//table[@class="table-info"]')
         services = {}
         for te in tlist:
@@ -133,27 +135,21 @@ class Hpcloud2Spider(CrawlSpider):
             if h3l:
                 h3e = h3l[-1]
                 h3text = h3e.select('text()')[0]
-                #print "h3text=",h3text.extract()
             h2l = te.select('.//preceding-sibling::h2')
             if h2l:
                 h2e = h2l[-1]
                 h2text = h2e.select('text()')[0]
-                #print "h2text=",h2text.extract()
             if h2l and h3l:
-                #print "load this table '%s' '%s " % (h2text,h3text)
                 key = h2text.extract().lower()
                 if key == "compute - windows":
                     key = "compute_windows"
 
-                #print "key=",key
                 tabledata = razb_table(te)
-                #pprint.pprint(tabledata)
                 services[key] = tabledata
 
         tlist = hxs.select('//section[@id="invoice_totals"]/table[@class="table-info"]')
         if tlist:
             table = razb_totals(tlist[0])
-            print "table=", table
             inv['totals'] = table
 
         inv['services'] = services

@@ -20,8 +20,8 @@ class RackSpiderBase(BaseSpider):
     def __init__(self, *args, **kwargs):
         super(RackSpiderBase, self).__init__(*args, **kwargs)
         self.account_id = None
-        self.username = "sudhi"
-        self.password = "Java0man"
+        self.username = None
+        self.password = None
         self.close_down = False
         self.errors = []
         self.old_invoices = []

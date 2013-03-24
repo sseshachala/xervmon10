@@ -24,6 +24,7 @@ class RackSpiderHistorical(RackSpiderBase):
 
         urls = (
             (self._URL_SERVERS, self.parse_servers),
+            (self._URL_SERVERS_ADD, self.parse_servers),
             (self._URL_BALANCER, self.parse_balancer),
             (self._URL_DNS, self.parse_dns),
             (self._URL_FILES, self.parse_files),

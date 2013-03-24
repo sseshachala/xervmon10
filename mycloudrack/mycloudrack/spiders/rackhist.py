@@ -91,7 +91,6 @@ class RackSpiderHistorical(RackSpiderBase):
 
     def parse_invoice_list(self, response):
         billing_info = self.json_to_obj(response.body)
-        log.msg("Invoices: %s" % str(billing_info))
         for info in billing_info['billing-summary']['item']:
             if info['type'].lower() == 'invoice':
                 invoice_id = info['itemId']

@@ -23,11 +23,11 @@ class RackSpiderHistorical(RackSpiderBase):
         yield Request(self._URL_INVOICES, callback=self.parse_invoice_list)
 
         urls = (
-            (self._URL_SERVERS, self.parse_servers)
-            (self._URL_BALANCER, self.parse_balancer)
-            (self._URL_DNS, self.parse_dns)
-            (self._URL_FILES, self.parse_files)
-            (self._URL_DATABASE, self.parse_database)
+            (self._URL_SERVERS, self.parse_servers),
+            (self._URL_BALANCER, self.parse_balancer),
+            (self._URL_DNS, self.parse_dns),
+            (self._URL_FILES, self.parse_files),
+            (self._URL_DATABASE, self.parse_database),
             (self._URL_BACKUP, self.parse_backup)
         )
         for url, callback in urls:
@@ -117,9 +117,18 @@ class RackSpiderHistorical(RackSpiderBase):
         inv_obj['total'] = invoice['invoiceTotalPrice']
         inv_obj['services'] = invoice['invoiceItem']
         service = invoice['invoiceItem'][0]
-        inv_obj['startdate'] = service['coverageStartDate']
-        inv_obj['enddate'] = service['coverageEndDate']
+        inv_obj['startdate'] = self.int_to_datetime(service['coverageStartDate'])
+        inv_obj['enddate'] = self.int_to_datetime(service['coverageEndDate'])
         yield inv_obj
+
+    def int_to_datetime(self, num):
+        try:
+            num = int(num)
+            return datetime.datetime.fromtimestamp(num / 1000)
+        except StandardError:
+            return num
+
+
 
     def _make_invoice_url(self, invoice_id):
         return '%s%s' % (self._URL_INVOICE, invoice_id)

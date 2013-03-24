@@ -68,12 +68,10 @@ class RackSpiderHistorical(RackSpiderBase):
 
     def parse_balancer(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(name='load balancers')
-        number = 0
+        item = RackService(number=0, name='load balancers')
         if obj:
-            number += sum([1 for inst in obj['loadBalancers']
+            item['number'] += sum([1 for inst in obj['loadBalancers']
                 if inst['status'] == 'ACTIVE'])
-        item['number'] = number
         yield item
 
     def parse_servers(self, response):

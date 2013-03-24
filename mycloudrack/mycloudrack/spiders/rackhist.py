@@ -45,7 +45,7 @@ class RackSpiderHistorical(RackSpiderBase):
             number += obj['totalEntries']
         yield item
 
-    def parse_databases(self, response):
+    def parse_database(self, response):
         obj = self.json_to_obj(response.body)
         item = RackService(name='databases')
         number = 0

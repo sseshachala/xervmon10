@@ -39,37 +39,31 @@ class RackSpiderHistorical(RackSpiderBase):
 
     def parse_dns(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(name='dns')
-        number = 0
+        item = RackService(number=0, name='dns')
         if obj:
-            number += obj['totalEntries']
+            item['number'] += obj['totalEntries']
         yield item
 
     def parse_database(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(name='databases')
-        number = 0
+        item = RackService(number=0, name='databases')
         if obj:
-            number += sum([1 for inst in obj['instances']
+            item['number'] += sum([1 for inst in obj['instances']
                 if inst['status'] == 'ACTIVE'])
         yield item
 
     def parse_backup(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(name='backup')
-        number = 0
+        item = RackService(number=0, name='backup')
         if obj:
-            number += len(obj)
-        item['number'] = number
+            item['number'] += len(obj)
         yield item
 
     def parse_files(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(name='file containers')
-        number = 0
+        item = RackService(number=0, name='file containers')
         if obj:
-            number += len(obj)
-        item['number'] = number
+            item['number'] += len(obj)
         yield item
 
     def parse_balancer(self, response):

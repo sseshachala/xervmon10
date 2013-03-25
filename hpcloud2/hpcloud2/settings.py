@@ -20,12 +20,11 @@ DOWNLOAD_DELAY = 0.25
 CONCURRENT_REQUESTS = 1
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
 
-EXTENSIONS = {}
 
 
 ITEM_PIPELINES = [
-        # 'hpcloud2.pipelines.MongoDBPipeline',
-        #'basecrawler.pipelines.StatusPipeline'
+         'hpcloud2.pipelines.MongoDBPipeline',
+        'basecrawler.pipelines.StatusPipeline'
         ]
 
 

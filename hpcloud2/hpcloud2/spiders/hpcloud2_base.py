@@ -95,7 +95,7 @@ class Hpcloud2Spider(CrawlSpider):
     def parse(self, response):
         hxs = HtmlXPathSelector(response)
         auth_token = hxs.select('//input[@name="authenticity_token"]/@value').extract()
-        if auth_token:
+        if auth_token and self.username and self.password:
             #print "make login request",self.username,self.password
             return [FormRequest.from_response(response, formnumber=0,
                         formdata={"user[username]": self.username, "user[password]": self.password,

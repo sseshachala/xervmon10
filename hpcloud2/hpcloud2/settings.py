@@ -20,10 +20,11 @@ DOWNLOAD_DELAY = 0.25
 CONCURRENT_REQUESTS = 1
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
 
+EXTENSIONS = {}
 
 
 ITEM_PIPELINES = [
-        'hpcloud2.pipelines.MongoDBPipeline',
+        # 'hpcloud2.pipelines.MongoDBPipeline',
         #'basecrawler.pipelines.StatusPipeline'
         ]
 
@@ -36,7 +37,6 @@ URLS = dict(
         _BILLS_URL = (
             #'https://console.hpcloud.com/invoices'
             'https://console.hpcloud.com/invoices?year=2012'
-            
           ),
         )
 

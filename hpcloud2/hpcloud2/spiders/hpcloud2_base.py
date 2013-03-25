@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-#
 #from __future__ import absolute_import
 
+import urlparse
+import datetime
+import pprint
+
 from scrapy.selector import HtmlXPathSelector
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.contrib.spiders import CrawlSpider, Rule
 
 from scrapy.http import FormRequest, Request
-from scrapy.utils.response import open_in_browser
+# from scrapy.utils.response import open_in_browser
 from scrapy import log
-import urlparse
-import datetime
-import pprint
+from scrapy.exceptions import CloseSpider
 
 # import sys
 # print "sys.path=",sys.path
@@ -63,8 +65,8 @@ def razb_table(te):
 
 class Hpcloud2Spider(CrawlSpider):
     name = 'hpcloud2'
-    allowed_domains = ['console.hpcloud.com']
     start_urls = ['https://console.hpcloud.com/login']
+    invoice_url = "https://account.hpcloud.com/invoices"
 
     def __init__(self, *args, **kwargs):
         super(Hpcloud2Spider, self).__init__(*args, **kwargs)
@@ -93,10 +95,17 @@ class Hpcloud2Spider(CrawlSpider):
         alert = hxs.select('//ul[@class="message-alert"]').extract()
         if alert:
             print "Invalid login"
-            print alert
+            raise CloseSpider(alert)
             return
-        item_url = "https://console.hpcloud.com/invoices?year=2012"
-        yield Request(url=item_url, callback=self.parse_bills_list)
+        yield Request(url=self.invoice_url, callback=self.parse_invoices)
+
+    def parse_invoices(self, response):
+        hxs = HtmlXPathSelector(response)
+        years = hxs.select(
+                '//select[@id="billing_year"]/option/@value').extract()
+        for year in years:
+            yield Request(url=('%s?year=%s' % (self.invoice_url, year)),
+                    callback=self.parse_bills_list)
 
     def parse_bills_list(self, response):
         hxs = HtmlXPathSelector(response)
@@ -107,7 +116,7 @@ class Hpcloud2Spider(CrawlSpider):
 
         for refs in allrefs:
             href = refs.select('@href').extract()[0]
-            yield Request(url=urlparse.urljoin(self.start_urls[0], href), callback=self.parse_bill)
+            yield Request(url=urlparse.urljoin(response.url, href), callback=self.parse_bill)
 
     def parse_bill(self, response):
         inv = HPCloudData()
@@ -116,7 +125,7 @@ class Hpcloud2Spider(CrawlSpider):
         # self.billno += 1
 
         hxs = HtmlXPathSelector(response)
-        elist = hxs.select('//*[@id="content"]/div[3]/section[1]/div/p[2]')
+        elist = hxs.select('//section[@class="container-fluid"]/div[3]/section[1]/div/p[2]')
         el = elist[0]
         slist = el.select('.//strong/text()')
         templ = '%B %d, %Y'
@@ -128,6 +137,7 @@ class Hpcloud2Spider(CrawlSpider):
         if inv['invoice_number'] in self.invoices:
             log.msg("Skipping. Invoice number " + inv['invoice_number'] + " already in db")
             return
+        self.invoices.append(inv['invoice_number'])
         tlist = hxs.select('//table[@class="table-info"]')
         services = {}
         for te in tlist:

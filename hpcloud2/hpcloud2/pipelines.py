@@ -19,7 +19,6 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         self.got_acid = False
         # From mongodb
         self.sbills = []
-        self.comcurrent = None
         self.old_bills = []
 
     def process_item(self, item, spider):
@@ -53,26 +52,17 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         spider.password = self.password
         now = datetime.datetime.now()
         self.ensure_index(HPCloudData)
-        if self.got_acid:
-            old_bills = [i for i in
-                self.mongodb[HPCloudData._collection_name].find(
-                    dict(
-                        cloud_account_id=str(self.user_id),
-                        account_id=self.account_id
-                    ))]
-            spider.invoices = [i['invoice_number'] for i in old_bills]
-            log.msg("Old invoices %s" % spider.invoices)
+        old_bills = [i for i in
+            self.mongodb[HPCloudData._collection_name].find(
+                dict(
+                    cloud_account_id=str(self.user_id),
+                    account_id=self.account_id
+                ))]
+        spider.invoices = [i['invoice_number'] for i in old_bills]
+        log.msg("Old invoices %s" % spider.invoices)
 
     def close_spider(self, spider):
         res = super(MongoDBPipeline, self).close_spider(spider)
         if not res:
             return
-
         self._write_to_mongo(self.sbills, HPCloudData._collection_name)
-        if self.comcurrent:
-            prev = self.mongodb[HPCloudCurrent._collection_name].remove(
-                dict(
-                    cloud_account_id=str(self.user_id),
-                    account_id=self.account_id
-                ))
-            self.mongodb[HPCloudCurrent._collection_name].insert(self.comcurrent)

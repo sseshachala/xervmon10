@@ -176,7 +176,7 @@ class Hpcloud2Spider(CrawlSpider):
             inv['totals'] = table
             total = 0
             for tot in table:
-                for name in ('Subtotal', 'Taxes'):
+                for name in ('subtotal', 'taxes'):
                     if name in tot['name'].lower():
                         total += clean_num(tot['cost'])
             inv['total'] = total

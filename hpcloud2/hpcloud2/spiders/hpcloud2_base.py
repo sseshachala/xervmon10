@@ -26,6 +26,19 @@ def get_all_text(t):
         return "".join(tl).strip()
     return tl
 
+def clean_num(val):
+    res = 0
+    if isinstance(val, (int, long, float)):
+        return float(val)
+    elif isinstance(val, basestring) and not val.strip():
+        return 0
+
+    try:
+        raw_re = re.search('[0-9]+([,.][0-9]+)?', val).group()
+        res = float(raw_re.replace(',', '.'))
+    except Exception, e:
+        res = 0
+    return res
 
 def razb_totals(te):
     colnames = dict({0: "name", 1: "cost"})
@@ -70,8 +83,8 @@ class Hpcloud2Spider(CrawlSpider):
 
     def __init__(self, *args, **kwargs):
         super(Hpcloud2Spider, self).__init__(*args, **kwargs)
-        self.username = 'sudhi@hooduku.com'
-        self.password = 'Java0man'
+        self.username = None
+        self.password = None
         self.billno = 1
         self.close_down = False
         self.errors = []
@@ -161,6 +174,14 @@ class Hpcloud2Spider(CrawlSpider):
         if tlist:
             table = razb_totals(tlist[0])
             inv['totals'] = table
+            total = 0
+            for tot in table:
+                for name in ('Subtotal', 'Taxes'):
+                    if name in tot['name'].lower():
+                        total += clean_num(tot['cost'])
+            sub = clean_num(table['Subtotal'])
+            inv['total'] = total
+
 
         inv['services'] = services
         yield  inv

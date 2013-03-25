@@ -117,7 +117,8 @@ class Hpcloud2Spider(CrawlSpider):
         years = hxs.select(
                 '//select[@id="billing_year"]/option/@value').extract()
         for year in years:
-            yield Request(url=urlparse.urljoin(response.url, '%s?year=%s' % (self.invoice_url, year)),
+            yield Request(url=(urlparse.urljoin(
+                    response.url, '%s?year=%s' % (self.invoice_url, year))),
                     callback=self.parse_bills_list)
 
     def parse_bills_list(self, response):

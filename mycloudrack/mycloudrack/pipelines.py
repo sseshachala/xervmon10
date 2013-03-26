@@ -79,10 +79,8 @@ class MongoDBPipeline(BaseMongoDBPipeline):
 class UrlPipeline(object):
     def open_spider(self, spider):
         urls = settings.get('URLS')
-        base_url = settings.get('BASE_URL')
+        self.base_url = settings.get('BASE_URL')
         specific_urls = settings.get("SPECIFIC_URLS")
-        if not self.base_url:
-            self.base_url = base_url
 
         specific_url = specific_urls.get(self.base_url, {})
         for attr, url in urls.items():

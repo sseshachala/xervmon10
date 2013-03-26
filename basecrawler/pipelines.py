@@ -194,7 +194,8 @@ class BaseMongoDBPipeline(object):
 
     def run_more_spider(self, name):
         url = 'http://localhost:6800/schedule.json'
-        setting = ('USER_ID', 'MONGO_DB', 'MYSQL_DB', 'MONGO_IP', 'MYSQL_HOST')
+        setting = ('USER_ID', 'MONGO_DB', 'MYSQL_DB', 'MONGO_IP', 'MYSQL_HOST',
+                'XWEBSERVICE_PORT')
         data = {
                 'project': settings.get('BOT_NAME'),
                 'spider': name,

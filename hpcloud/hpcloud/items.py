@@ -1,12 +1,15 @@
+# Define here the models for your scraped items
+#
+# See documentation in:
+# http://doc.scrapy.org/topics/items.html
+#from __future__ import absolute_import
 
 from scrapy.item import Item, Field
 
 from basecrawler.items import MongoItem
 
-
-class HPCloudAccount(Item):
+class Hpcloud2Item(Item):
     account_id = Field()
-
 
 class HPCloudCurrent(MongoItem):
     _collection_name = "hpcloud_current"

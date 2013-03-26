@@ -31,8 +31,11 @@ ITEM_PIPELINES = [
 URLS = dict(
         _LOGIN_URL = (
             'https://console.hpcloud.com/login'
+            #'https://console.hpcloud.com/invoices?year=2012'
             ),
         _BILLS_URL = (
-            'https://console.hpcloud.com/invoices'),
+            #'https://console.hpcloud.com/invoices'
+            'https://console.hpcloud.com/invoices?year=2012'
+          ),
         )
 

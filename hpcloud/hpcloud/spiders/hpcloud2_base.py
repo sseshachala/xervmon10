@@ -77,7 +77,7 @@ def razb_table(te):
 
 
 class Hpcloud2Spider(CrawlSpider):
-    name = 'hpcloud2'
+    name = 'hpcloud_history'
     start_urls = ['https://console.hpcloud.com/login']
     invoice_url = "https://account.hpcloud.com/invoices"
 

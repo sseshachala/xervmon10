@@ -28,6 +28,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
 
         elif isinstance(item, RackInvoice):
             item['cloud_account_id'] = self.user_id
+            item['account_id'] = self.account_id
             obj = item.get_mongo_obj()
             self.invoices.append(obj)
             return item

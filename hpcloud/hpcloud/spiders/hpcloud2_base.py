@@ -125,7 +125,7 @@ class Hpcloud2Spider(CrawlSpider):
             yield account
         for year in years:
             yield Request(url=(urlparse.urljoin(
-                    response.url, '%s?year=%s' % (self.invoice_url, year))),
+                    response.url, year)),
                     callback=self.parse_bills_list)
 
     def parse_bills_list(self, response):

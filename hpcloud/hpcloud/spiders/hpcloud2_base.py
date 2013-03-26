@@ -17,7 +17,7 @@ from scrapy.exceptions import CloseSpider
 # import sys
 # print "sys.path=",sys.path
 
-from hpcloud.items import Hpcloud2Item, HPCloudCurrent, HPCloudData
+from hpcloud.items import Hpcloud2Item, HPCloudCurrent, HPCloudData, HPCloudAccount
 
 
 def get_all_text(t):

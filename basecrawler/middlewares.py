@@ -3,13 +3,15 @@ from scrapy.exceptions import CloseSpider
 
 class ErrorsMiddleware(object):
     def process_spider_exception(self, response, exception, spider):
-        log.msg("PROCESS EXCEPTION")
-        spider.errors.append(str(exception))
-        raise CloseSpider(str(exception))
+        exc = str(exception)
+        log.msg("PROCESS EXCEPTION: %s" % exc)
+        spider.errors.append(exc)
         return []
-        
+
+
 class ErrorDownloader(object):
     def process_exception(self, request, exception, spider):
-        log.msg("PROCESS DOWNLOADER EXCEPTION")
-        spider.errors.append(str(exception))
+        exc = str(exception)
+        log.msg("PROCESS DOWNLOADER EXCEPTION: %s" % exc)
+        spider.errors.append(exc)
         return None

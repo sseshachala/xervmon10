@@ -116,9 +116,13 @@ class Hpcloud2Spider(CrawlSpider):
         hxs = HtmlXPathSelector(response)
         years = hxs.select(
                 '//select[@id="billing_year"]/option/@value').extract()
-        account = HPCloudAccount(
-                account_id=hxs.select('//span[@id="accountId"]/text()').extract()[0])
-        yield account
+        try:
+            account = HPCloudAccount(
+                account_id=hxs.select('//span[@id="accountId"]/text()').extract()[0].strip())
+        except Exception, e:
+            raise CloseSpider('No account id')
+        else:
+            yield account
         for year in years:
             yield Request(url=(urlparse.urljoin(
                     response.url, '%s?year=%s' % (self.invoice_url, year))),

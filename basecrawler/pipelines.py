@@ -193,6 +193,7 @@ class BaseMongoDBPipeline(object):
             self.mongodb[Item._collection_name].ensure_index(i)
 
     def run_more_spider(self, name):
+        log.msg("Try to run spider %s" % name)
         url = 'http://localhost:6800/schedule.json'
         setting = ('USER_ID', 'MONGO_DB', 'MYSQL_DB', 'MONGO_IP', 'MYSQL_HOST',
                 'XWEBSERVICE_PORT')

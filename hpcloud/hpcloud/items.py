@@ -8,6 +8,9 @@ from scrapy.item import Item, Field
 
 from basecrawler.items import MongoItem
 
+class HPCloudAccount(Item):
+    account_id = Field()
+
 class Hpcloud2Item(Item):
     account_id = Field()
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import datetime
+from urlparse import urljoin
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 

@@ -1,18 +1,14 @@
 
-import re
-import os.path
 import json
-from dateutil.relativedelta import relativedelta
 import datetime
 from urlparse import urljoin
-from BeautifulSoup import BeautifulSoup
 
 from scrapy.http import Request
 from scrapy import log
 from scrapy.conf import settings
 
 from mycloudrack.spiders.rackbase import RackSpiderBase
-from mycloudrack.items import *
+from mycloudrack.items import RackInvoice, RackService, RackCredit
 
 
 class RackSpiderHistorical(RackSpiderBase):
@@ -93,13 +89,17 @@ class RackSpiderHistorical(RackSpiderBase):
     def parse_invoice_list(self, response):
         billing_info = self.json_to_obj(response.body)
         for info in billing_info['billing-summary']['item']:
+            credit = RackCredit(amount=0)
             if info['type'].lower() == 'invoice':
                 invoice_id = info['itemId']
+                if info['itemStatus'].lower() == 'unpaid':
+                    credit['amount'] += info['itemAmount']
                 if invoice_id in self.old_invoices:
                     continue
                 invoice_href = self._make_invoice_url(invoice_id)
                 yield Request(invoice_href,
                         callback=self.parse_invoice)
+        yield RackCredit
 
     def parse_invoice(self, response):
         invoice_info = self.json_to_obj(response.body)

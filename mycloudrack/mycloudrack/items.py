@@ -5,6 +5,10 @@ class RackAccount(Item):
     account_id = Field()
 
 
+class RackCredit(Item):
+    amount = Field()
+
+
 class RackService(Item):
     name = Field()
     number = Field()
@@ -18,6 +22,7 @@ class RackCurrent(MongoItem):
             "account_id",
             "last_updated",
             "services",
+            "credit_amount"
             ]
 
 class RackInvoice(MongoItem):

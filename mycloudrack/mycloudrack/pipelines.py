@@ -20,11 +20,15 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         self.invoices = []
         self.old_invoices = []
         self.account_id = None
+        self.credit = None
 
     def process_item(self, item, spider):
         if isinstance(item, RackService):
             self.services[item['name']] += item['number']
             return item
+
+        elif isinstance(item, RackCredit):
+            self.credit = item['amount']
 
         elif isinstance(item, RackInvoice):
             item['cloud_account_id'] = self.user_id
@@ -65,6 +69,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         item['cloud_account_id'] = self.user_id
         item['account_id'] = self.account_id
         item['last_updated'] = datetime.datetime.now()
+        item['credit_amount'] = self.credit
         item['services'] = []
         for name, total in self.services.items():
             item['services'].append({

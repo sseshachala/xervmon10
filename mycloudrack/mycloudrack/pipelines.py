@@ -29,6 +29,9 @@ class MongoDBPipeline(BaseMongoDBPipeline):
 
         elif isinstance(item, RackCredit):
             self.credit = item['amount']
+        elif isinstance(item, RackAccount) and not self.account_id:
+            self.account_id = item['account_id']
+            self._update_account_id()
 
         elif isinstance(item, RackInvoice):
             item['cloud_account_id'] = self.user_id

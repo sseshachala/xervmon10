@@ -50,6 +50,10 @@ class RackSpiderHistorical(RackSpiderBase):
         yield item
 
     def parse_backup(self, response):
+        yield Request(url=self._URL_BACKUP_DATA,
+                callback=self.parse_backup_data)
+
+    def parse_backup_data(self, response):
         obj = self.json_to_obj(response.body)
         item = RackService(number=0, name='backup')
         if obj:

@@ -25,7 +25,8 @@ URLS = dict(
     _URL_DNS = "/proxy/rax:dns,cloudDNS/domains/?offset=0&limit=100",
     _URL_FILES = "/proxy/object-store,cloudFiles,{region}/?limit=100",
     _URL_DATABASE = "/proxy/rax:database,cloudDatabases,{region}/instances",
-    _URL_BACKUP = "https://clouddrive.rackspace.com/services/v1.0/user/agents/"
+    _URL_BACKUP = "https://clouddrive.rackspace.com/systems",
+    _URL_BACKUP_DATA = "https://clouddrive.rackspace.com/services/v1.0/user/agents/"
         )
 
 REGIONS = (

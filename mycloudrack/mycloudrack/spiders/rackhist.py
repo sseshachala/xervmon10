@@ -103,7 +103,7 @@ class RackSpiderHistorical(RackSpiderBase):
                 invoice_href = self._make_invoice_url(invoice_id)
                 yield Request(invoice_href,
                         callback=self.parse_invoice)
-        yield RackCredit
+        yield credit
 
     def parse_invoice(self, response):
         invoice_info = self.json_to_obj(response.body)

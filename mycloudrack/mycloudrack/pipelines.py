@@ -44,12 +44,6 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         res = super(MongoDBPipeline, self).open_spider(spider)
         if not res:
             return
-        if not self.account_id:
-            log.msg('No account id')
-            spider.errors.append("No account id")
-            spider.close_down = True
-            return
-
 
         spider.username = self.username
         spider.password = self.password

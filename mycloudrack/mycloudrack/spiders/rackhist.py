@@ -92,8 +92,8 @@ class RackSpiderHistorical(RackSpiderBase):
 
     def parse_invoice_list(self, response):
         billing_info = self.json_to_obj(response.body)
+        credit = RackCredit(amount=0)
         for info in billing_info['billing-summary']['item']:
-            credit = RackCredit(amount=0)
             if info['type'].lower() == 'invoice':
                 invoice_id = info['itemId']
                 if info['itemStatus'].lower() == 'unpaid':

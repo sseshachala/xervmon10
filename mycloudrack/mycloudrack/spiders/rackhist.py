@@ -30,20 +30,28 @@ class RackSpiderHistorical(RackSpiderBase):
         for url, callback in urls:
             if '{region}' in url:
                 for region in settings.get('REGIONS'):
-                    yield Request(url.format(region=region), callback=callback)
+                    meta = {'item': RackService(number=0, region=region)}
+                    yield Request(url.format(region=region), callback=callback,
+                            meta=meta)
             else:
-                yield Request(url, callback=callback)
+                meta = {'item': RackService(number=0)}
+                yield Request(url, callback=callback, meta=meta)
 
     def parse_dns(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(number=0, name='dns')
+        item = response.meta['item']
+        item['name'] = 'dns'
         if obj:
-            item['number'] += obj['totalEntries']
+            try:
+                item['number'] += obj['totalEntries']
+            except KeyError:
+                pass
         yield item
 
     def parse_database(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(number=0, name='databases')
+        item = response.meta['item']
+        item['name'] = 'databases'
         if obj:
             item['number'] += sum([1 for inst in obj['instances']
                 if inst['status'] == 'ACTIVE'])
@@ -55,21 +63,25 @@ class RackSpiderHistorical(RackSpiderBase):
 
     def parse_backup_data(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(number=0, name='backup')
+        item = response.meta['item']
+        item['name'] = 'backup'
+
         if obj:
             item['number'] += len(obj)
         yield item
 
     def parse_files(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(number=0, name='file containers')
+        item = response.meta['item']
+        item['name'] = 'file containers'
         if obj:
             item['number'] += len(obj)
         yield item
 
     def parse_balancer(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(number=0, name='load balancers')
+        item = response.meta['item']
+        item['name'] = 'load balancers'
         if obj:
             item['number'] += sum([1 for inst in obj['loadBalancers']
                 if inst['status'] == 'ACTIVE'])
@@ -77,9 +89,13 @@ class RackSpiderHistorical(RackSpiderBase):
 
     def parse_servers(self, response):
         obj = self.json_to_obj(response.body)
-        item = RackService(name='active servers', number=0)
-        errItem = RackService(name='error servers', number=0)
-        buildItem = RackService(name='build servers', number=0)
+        item = response.meta['item']
+        item['name'] = 'active servers'
+        errItem = response.meta['item']
+        errItem['name'] = 'error servers'
+        buildItem = response.meta['item']
+        buildItem['name'] = 'build servers'
+
         if obj:
             item['number'] += sum([1 for inst in obj['servers']
                 if inst['status'] == 'ACTIVE'])

@@ -30,10 +30,12 @@ URLS = dict(
 
 REGIONS = (
         'DFW',
-        'ORD'
+        'ORD',
+        'LON'
         )
 
 SPECIFIC_URLS = {
-        "https://mycloud.rackspace.co.uk": {
-            }
+        "https://mycloud.rackspace.co.uk": dict(
+    _URL_BACKUP_DATA = "https://clouddrive.rackspace.co.uk/services/v1.0/user/agents/"
+            )
         }

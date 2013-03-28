@@ -12,6 +12,7 @@ class RackCredit(Item):
 class RackService(Item):
     name = Field()
     number = Field()
+    region = Field()
 
 
 class RackCurrent(MongoItem):
@@ -22,7 +23,8 @@ class RackCurrent(MongoItem):
             "account_id",
             "last_updated",
             "services",
-            "credit_amount"
+            "credit_amount",
+            "regions"
             ]
 
 class RackInvoice(MongoItem):

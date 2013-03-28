@@ -17,6 +17,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         super(MongoDBPipeline, self).__init__()
         # List of servers with info 
         self.services = defaultdict(int)
+        self.regions = defaultdict(defaultdict(int))
         self.invoices = []
         self.old_invoices = []
         self.account_id = None
@@ -25,6 +26,8 @@ class MongoDBPipeline(BaseMongoDBPipeline):
     def process_item(self, item, spider):
         if isinstance(item, RackService):
             self.services[item['name']] += item['number']
+            if 'region' in item:
+                self.regions[item['region']][item['name']] += item['number']
             return item
 
         elif isinstance(item, RackCredit):
@@ -76,6 +79,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         item['last_updated'] = datetime.datetime.now()
         item['credit_amount'] = self.credit
         item['services'] = []
+        item['regions'] = self.regions
         for name, total in self.services.items():
             item['services'].append({
                 'name': name,

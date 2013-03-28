@@ -17,7 +17,7 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         super(MongoDBPipeline, self).__init__()
         # List of servers with info 
         self.services = defaultdict(int)
-        self.regions = defaultdict(defaultdict(int))
+        self.regions = defaultdict(lambda : defaultdict(int))
         self.invoices = []
         self.old_invoices = []
         self.account_id = None

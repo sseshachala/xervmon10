@@ -230,6 +230,8 @@ class BaseMongoDBPipeline(object):
             self.cloud_provider = self.session.query(
                     CloudProviders).get(user.cloud_provider)
             self.base_url = self.cloud_provider.starturl
+            if not self.base_url:
+                self.base_url = settings.get('BASE_URL')
             accid = user.account_id
             if accid:
                 accid = accid.replace("-", "")

@@ -8,7 +8,6 @@ USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
 
 
 ITEM_PIPELINES = [
-        'mycloudrack.pipelines.UrlPipeline',
         'mycloudrack.pipelines.MongoDBPipeline',
         'basecrawler.pipelines.StatusPipeline'
         ]

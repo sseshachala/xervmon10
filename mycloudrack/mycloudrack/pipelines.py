@@ -44,6 +44,14 @@ class MongoDBPipeline(BaseMongoDBPipeline):
         res = super(MongoDBPipeline, self).open_spider(spider)
         if not res:
             return
+        urls = settings.get('URLS')
+        specific_urls = settings.get("SPECIFIC_URLS")
+
+        specific_url = specific_urls.get(self.base_url, {})
+        for attr, url in urls.items():
+            if attr in specific_url:
+                url = specific_url[attr]
+            setattr(spider, attr, urljoin(self.base_url, url))
 
         spider.username = self.username
         spider.password = self.password
@@ -79,28 +87,3 @@ class MongoDBPipeline(BaseMongoDBPipeline):
             })
         self.mongodb[RackCurrent._collection_name].insert(item.get_mongo_obj())
 
-
-class UrlPipeline(object):
-    def open_spider(self, spider):
-        urls = settings.get('URLS')
-        self.base_url = settings.get('BASE_URL')
-        specific_urls = settings.get("SPECIFIC_URLS")
-
-        specific_url = specific_urls.get(self.base_url, {})
-        for attr, url in urls.items():
-            if attr in specific_url:
-                url = specific_url[attr]
-            setattr(spider, attr, urljoin(self.base_url, url))
-
-
-class UserStorage(Base):
-    __tablename__ = "user_storage_providers"
-    __table_args__ = {"autoload": True}
-
-
-class UserCloud(Base):
-    __tablename__ = "user_cloud_providers"
-    __table_args__ = {"autoload": True}
-
-
-Base.metadata.create_all(engine)

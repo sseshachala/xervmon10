@@ -59,7 +59,7 @@ class RackSpiderHistorical(RackSpiderBase):
 
     def parse_backup(self, response):
         yield Request(url=self._URL_BACKUP_DATA,
-                callback=self.parse_backup_data)
+                callback=self.parse_backup_data, meta=response.meta)
 
     def parse_backup_data(self, response):
         obj = self.json_to_obj(response.body)

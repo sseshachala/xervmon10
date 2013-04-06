@@ -117,7 +117,7 @@ class Hpcloud2Spider(CrawlSpider):
             raise CloseSpider(alert)
             return
         yield Request(url=self._BILLS_URL, callback=self.parse_invoices)
-        self.parse_current_usage()
+        yield self.parse_current_usage()
 
     def parse_invoices(self, response):
         hxs = HtmlXPathSelector(response)

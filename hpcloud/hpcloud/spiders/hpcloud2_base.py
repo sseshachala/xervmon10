@@ -122,7 +122,11 @@ class Hpcloud2Spider(CrawlSpider):
         for region in settings.get("REGIONS"):
             item = HPCloudService(region=region, number=0)
             meta = {'item': item}
+            headers = {
+                    'X-Requested-With':'XMLHttpRequest'
+                    }
             yield Request(self._FILES_URL.format(region=region),
+                    headers=headers,
                 callback=self.parse_files, meta=meta, errback=self.current_error)
             for zone in settings.get("ZONES"):
                 item = HPCloudService(region=region, number=0)

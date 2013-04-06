@@ -119,12 +119,12 @@ class Hpcloud2Spider(CrawlSpider):
         self.log.msg("Parsing current usage")
         meta = {}
         for region in settings.get("REGIONS"):
-            item = HPCloudService(region=region)
+            item = HPCloudService(region=region, number=0)
             meta = {'item': item}
             yield Request(self._FILES_URL.format(region=region),
                 callback=self.parse_files, meta=meta, errback=self.current_error)
             for zone in settings.get("ZONES"):
-                item = HPCloudService(region=region)
+                item = HPCloudService(region=region, number=0)
                 meta = {'item': item, 'zone': zone}
                 yield Request(self._SERVERS_URL.format(region=region, zone=zone),
                     callback=self.parse_servers, meta=meta,
@@ -162,7 +162,7 @@ class Hpcloud2Spider(CrawlSpider):
         if obj:
             item = response.meta['item']
             item['name'] = 'Containers'
-            item['number'] = len(obj)
+            item['number'] += len(obj)
             yield item
 
     def parse_files(self, response):

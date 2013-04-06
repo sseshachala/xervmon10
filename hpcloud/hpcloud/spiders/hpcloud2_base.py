@@ -4,6 +4,7 @@
 import urlparse
 import datetime
 import pprint
+import copy
 import re
 import json
 
@@ -167,20 +168,22 @@ class Hpcloud2Spider(CrawlSpider):
 
     def parse_servers(self, response):
         obj = self.json_to_obj(response.body)
+
         item = response.meta['item']
-        item['name'] = 'active servers'
-        errItem = response.meta['item']
+        actItem = copy.deepcopy(item)
+        actItem['name'] = 'active servers'
+        errItem = copy.deepcopy(item)
         errItem['name'] = 'error servers'
-        buildItem = response.meta['item']
+        buildItem = copy.deepcopy(item)
         buildItem['name'] = 'build servers'
         if obj:
-            item['number'] += sum([1 for inst in obj
+            actItem['number'] += sum([1 for inst in obj
                 if inst['status'] == 'Active'])
             buildItem['number'] += sum([1 for inst in obj
                 if inst['status'] == 'Build'])
             errItem['number'] += sum([1 for inst in obj
                 if inst['status'] == 'Error'])
-        yield item
+        yield actItem
         yield buildItem
         yield errItem
 

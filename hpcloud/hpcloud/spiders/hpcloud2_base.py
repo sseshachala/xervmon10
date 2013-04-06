@@ -122,13 +122,17 @@ class Hpcloud2Spider(CrawlSpider):
             item = HPCloudService(region=region)
             meta = {'item': item}
             yield Request(self._FILES_URL.format(region=region),
-                callback=self.parse_files, meta=meta)
+                callback=self.parse_files, meta=meta, errback=self.current_error)
             for zone in settings.get("ZONES"):
                 item = HPCloudService(region=region)
                 meta = {'item': item, 'zone': zone}
                 yield Request(self._SERVERS_URL.format(region=region, zone=zone),
-                    callback=self.parse_servers, meta=meta)
+                    callback=self.parse_servers, meta=meta,
+                    errback=self.current_error)
         yield Request(url=self._BILLS_URL, callback=self.parse_invoices)
+
+    def current_error(self, failure):
+        self.log.msg("Error getting current info %s" % str(failure))
 
     def parse_invoices(self, response):
         hxs = HtmlXPathSelector(response)

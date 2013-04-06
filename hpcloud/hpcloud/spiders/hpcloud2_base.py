@@ -166,7 +166,6 @@ class Hpcloud2Spider(CrawlSpider):
     def parse_files(self, response):
         obj = self.json_to_obj(response.body)
         item = response.meta['item']
-        item = response.meta['item']
         item['name'] = 'active servers'
         errItem = response.meta['item']
         errItem['name'] = 'error servers'

@@ -196,6 +196,8 @@ class Hpcloud2Spider(CrawlSpider):
             invoice_date = datetime.datetime.strptime(invoice_date, '%m/%d/%Y')
             meta = {'date': invoice_date}
             if invoice_date in self.invoices:
+                self.log.msg("Skipping invoice with date %s in db" %
+                        str(invoice_date))
                 continue
             yield Request(url=urlparse.urljoin(response.url, href),
                     callback=self.parse_bill, meta=meta)

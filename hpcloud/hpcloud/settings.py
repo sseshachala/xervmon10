@@ -43,7 +43,7 @@ URLS = dict(
             'https://console.hpcloud.com/login'
             ),
         _BILLS_URL = (
-            'https://console.hpcloud.com/invoices'
+            'https://account.hpcloud.com/invoices'
           ),
         _SERVERS_URL = 'https://console.hpcloud.com/compute/{zone}_region-{region}/servers.json',
         _FILES_URL = 'https://console.hpcloud.com/object_store/region-{region}/containers',

@@ -204,7 +204,8 @@ class Hpcloud2Spider(CrawlSpider):
 
     def parse_bill(self, response):
         meta = response.meta
-        inv = HPCloudData(invoice_date=meta['invoice_date'])
+        inv = HPCloudData()
+        inv['invoice_date'] = meta['invoice_date']
         # with open("bill%02d.html" % (self.billno,), "w") as f:
         #     f.write("".join(response.body))
         # self.billno += 1

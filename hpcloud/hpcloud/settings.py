@@ -29,8 +29,7 @@ ITEM_PIPELINES = [
 
 
 REGIONS = (
-        'a-geo-1',
-        'a-geo-2'
+        'a_geo-1',
         )
 ZONES = (
         'az-1',

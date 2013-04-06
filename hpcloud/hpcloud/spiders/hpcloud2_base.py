@@ -236,7 +236,7 @@ class Hpcloud2Spider(CrawlSpider):
             #     h2text = h2e.select('text()')[0]
             # if h2l and h3l:
             if h3l:
-                key = h3l.extract().lower()
+                key = h3l.extract()[0].lower()
                 if key == "compute - windows":
                     key = "compute_windows"
 

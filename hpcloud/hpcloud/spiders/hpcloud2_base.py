@@ -149,16 +149,17 @@ class Hpcloud2Spider(CrawlSpider):
     def json_to_obj(self, json_body):
         try:
             obj = json.loads(json_body)
+            return obj
         except Exception, e:
             self.log.msg("Error parsing json: %s" % str(e))
-        return obj
 
     def parse_servers(self, response):
         obj = self.json_to_obj(response.body)
-        item = response.meta['item']
-        item['name'] = 'Containers'
-        item['number'] = len(obj)
-        yield item
+        if obj:
+            item = response.meta['item']
+            item['name'] = 'Containers'
+            item['number'] = len(obj)
+            yield item
 
     def parse_files(self, response):
         obj = self.json_to_obj(response.body)

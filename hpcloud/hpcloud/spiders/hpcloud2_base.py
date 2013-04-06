@@ -243,8 +243,8 @@ class Hpcloud2Spider(CrawlSpider):
                 tabledata = razb_table(te)
                 services[key] = tabledata
 
-        tlist =
-        hxs.select('//section[@id="invoice_totals"]/table[@id="invoice-totals"]')
+        tlist = hxs.select(
+                '//section[@id="invoice_totals"]/table[@id="invoice-totals"]')
         if tlist:
             table = razb_totals(tlist[0])
             inv['totals'] = table

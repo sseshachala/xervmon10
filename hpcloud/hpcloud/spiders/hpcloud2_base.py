@@ -223,18 +223,19 @@ class Hpcloud2Spider(CrawlSpider):
             log.msg("Skipping. Invoice number " + inv['invoice_number'] + " already in db")
             return
         self.invoices.append(inv['invoice_number'])
-        tlist = hxs.select('//table[@class="table-info"]')
+        tlist = hxs.select('//table[@id="billing-info"]')
         services = {}
         for te in tlist:
-            h3l = te.select('.//preceding-sibling::h3')
+            h3l = te.select('.//preceding-sibling::h5')
             if h3l:
                 h3e = h3l[-1]
                 h3text = h3e.select('text()')[0]
-            h2l = te.select('.//preceding-sibling::h2')
-            if h2l:
-                h2e = h2l[-1]
-                h2text = h2e.select('text()')[0]
-            if h2l and h3l:
+            # h2l = te.select('.//preceding-sibling::h2')
+            # if h2l:
+            #     h2e = h2l[-1]
+            #     h2text = h2e.select('text()')[0]
+            # if h2l and h3l:
+            if h3l:
                 key = h2text.extract().lower()
                 if key == "compute - windows":
                     key = "compute_windows"
@@ -242,7 +243,8 @@ class Hpcloud2Spider(CrawlSpider):
                 tabledata = razb_table(te)
                 services[key] = tabledata
 
-        tlist = hxs.select('//section[@id="invoice_totals"]/table[@class="table-info"]')
+        tlist =
+        hxs.select('//section[@id="invoice_totals"]/table[@id="invoice-totals"]')
         if tlist:
             table = razb_totals(tlist[0])
             inv['totals'] = table

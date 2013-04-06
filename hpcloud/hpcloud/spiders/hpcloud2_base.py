@@ -116,7 +116,18 @@ class Hpcloud2Spider(CrawlSpider):
             print "Invalid login"
             raise CloseSpider(alert)
             return
-        self.parse_current_usage()
+        self.log.msg("Parsing current usage")
+        meta = {}
+        for region in settings.get("REGIONS"):
+            item = HPCloudService(region=region)
+            meta = {'item': item}
+            yield Request(self._SERVERS_URL.format(region=region),
+                callback=self.parse_servers, meta=meta)
+            for zone in settings.get("ZONES"):
+                item = HPCloudService(region=region)
+                meta = {'item': item, 'zone': zone}
+                yield Request(self._FILES_URL.format(region=region, zone=zone),
+                    callback=self.parse_files, meta=meta)
         yield Request(url=self._BILLS_URL, callback=self.parse_invoices)
 
     def parse_invoices(self, response):
@@ -134,20 +145,6 @@ class Hpcloud2Spider(CrawlSpider):
             yield Request(url=(urlparse.urljoin(
                     response.url, year)),
                     callback=self.parse_bills_list)
-
-    def parse_current_usage(self):
-        self.log.msg("Parsing current usage")
-        meta = {}
-        for region in settings.get("REGIONS"):
-            item = HPCloudService(region=region)
-            meta = {'item': item}
-            yield Request(self._SERVERS_URL.format(region=region),
-                callback=self.parse_servers, meta=meta)
-            for zone in settings.get("ZONES"):
-                item = HPCloudService(region=region)
-                meta = {'item': item, 'zone': zone}
-                yield Request(self._FILES_URL.format(region=region, zone=zone),
-                    callback=self.parse_files, meta=meta)
 
     def json_to_obj(self, json_body):
         try:

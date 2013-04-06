@@ -157,7 +157,7 @@ class Hpcloud2Spider(CrawlSpider):
         except Exception, e:
             self.log.msg("Error parsing json: %s" % str(e))
 
-    def parse_servers(self, response):
+    def parse_files(self, response):
         obj = self.json_to_obj(response.body)
         if obj:
             item = response.meta['item']
@@ -165,7 +165,7 @@ class Hpcloud2Spider(CrawlSpider):
             item['number'] += len(obj)
             yield item
 
-    def parse_files(self, response):
+    def parse_servers(self, response):
         obj = self.json_to_obj(response.body)
         item = response.meta['item']
         item['name'] = 'active servers'

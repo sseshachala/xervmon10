@@ -4,6 +4,8 @@
 import urlparse
 import datetime
 import pprint
+import re
+import json
 
 from scrapy.selector import HtmlXPathSelector
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
@@ -12,12 +14,14 @@ from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.http import FormRequest, Request
 # from scrapy.utils.response import open_in_browser
 from scrapy import log
+from scrapy.conf import settings
 from scrapy.exceptions import CloseSpider
 
 # import sys
 # print "sys.path=",sys.path
 
-from hpcloud.items import Hpcloud2Item, HPCloudCurrent, HPCloudData, HPCloudAccount
+from hpcloud.items import Hpcloud2Item, HPCloudCurrent, HPCloudData, \
+        HPCloudAccount, HPCloudService
 
 
 def get_all_text(t):
@@ -77,9 +81,11 @@ def razb_table(te):
 
 
 class Hpcloud2Spider(CrawlSpider):
+    _urls = settings.get('URLS')
+    if isinstance(_urls, dict):
+        vars().update(_urls)
     name = 'hpcloud_history'
-    start_urls = ['https://console.hpcloud.com/login']
-    invoice_url = "https://account.hpcloud.com/invoices"
+    start_urls = [_LOGIN_URL]
 
     def __init__(self, *args, **kwargs):
         super(Hpcloud2Spider, self).__init__(*args, **kwargs)
@@ -110,7 +116,8 @@ class Hpcloud2Spider(CrawlSpider):
             print "Invalid login"
             raise CloseSpider(alert)
             return
-        yield Request(url=self.invoice_url, callback=self.parse_invoices)
+        yield Request(url=self._BILLS_URL, callback=self.parse_invoices)
+        self.parse_current_usage()
 
     def parse_invoices(self, response):
         hxs = HtmlXPathSelector(response)
@@ -128,6 +135,54 @@ class Hpcloud2Spider(CrawlSpider):
                     response.url, year)),
                     callback=self.parse_bills_list)
 
+    def parse_current_usage(self):
+        self.log.msg("Parsing current usage")
+        meta = {}
+        for region in settings.get("REGIONS"):
+            item = HPCloudService(region=region)
+            meta = {'item': item}
+            yield Request(self._SERVERS_URL.format(region=region),
+                callback=self.parse_servers, meta=meta)
+            for zone in settings.get("ZONES"):
+                item = HPCloudService(region=region)
+                meta = {'item': item, 'zone': zone}
+                yield Request(self._FILES_URL.format(region=region, zone=zone),
+                    callback=self.parse_files, meta=meta)
+
+    def json_to_obj(self, json_body):
+        try:
+            obj = json.loads(json_body)
+        except Exception, e:
+            self.log.msg("Error parsing json: %s" % str(e))
+        return obj
+
+    def parse_servers(self, response):
+        obj = self.json_to_obj(response.body)
+        item = response.meta['item']
+        item['name'] = 'Containers'
+        item['number'] = len(obj)
+        yield item
+
+    def parse_files(self, response):
+        obj = self.json_to_obj(response.body)
+        item = response.meta['item']
+        item = response.meta['item']
+        item['name'] = 'active servers'
+        errItem = response.meta['item']
+        errItem['name'] = 'error servers'
+        buildItem = response.meta['item']
+        buildItem['name'] = 'build servers'
+        if obj:
+            item['number'] += sum([1 for inst in obj
+                if inst['status'] == 'Active'])
+            buildItem['number'] += sum([1 for inst in obj
+                if inst['status'] == 'Build'])
+            errItem['number'] += sum([1 for inst in obj
+                if inst['status'] == 'Error'])
+        yield item
+        yield buildItem
+        yield errItem
+
     def parse_bills_list(self, response):
         hxs = HtmlXPathSelector(response)
         allrefs = hxs.select('//td[@class="shrink"]/a')
@@ -137,10 +192,17 @@ class Hpcloud2Spider(CrawlSpider):
 
         for refs in allrefs:
             href = refs.select('@href').extract()[0]
-            yield Request(url=urlparse.urljoin(response.url, href), callback=self.parse_bill)
+            invoice_date = refs.select('text()').extract()[0]
+            invoice_date = datetime.datetime.strptime(invoice_date, '%m/%d/%Y')
+            meta = {'date': invoice_date}
+            if invoice_date in self.invoices:
+                continue
+            yield Request(url=urlparse.urljoin(response.url, href),
+                    callback=self.parse_bill, meta=meta)
 
     def parse_bill(self, response):
-        inv = HPCloudData()
+        meta = response.meta
+        inv = HPCloudData(invoice_date=meta['invoice_date'])
         # with open("bill%02d.html" % (self.billno,), "w") as f:
         #     f.write("".join(response.body))
         # self.billno += 1

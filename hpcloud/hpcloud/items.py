@@ -17,13 +17,18 @@ class Hpcloud2Item(Item):
 class HPCloudCurrent(MongoItem):
     _collection_name = "hpcloud_current"
     _mongo_keys = [
-            "startdate",
-            "enddate",
             "cloud_account_id",
+            "last_updated",
             "account_id",
-            "total",
-            "tax"
+            "services",
+            "regions"
             ]
+
+class HPCloudService(Item):
+    name = Field()
+    number = Field()
+    zone = Field()
+    region = Field()
 
 class HPCloudData(MongoItem):
     _collection_name = "hpcloud_data"
@@ -35,6 +40,7 @@ class HPCloudData(MongoItem):
             "total",
             "services",
             "totals",
-            "invoice_number"
+            "invoice_number",
+            "invoice_date"
             ]
 

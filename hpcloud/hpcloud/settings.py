@@ -28,14 +28,24 @@ ITEM_PIPELINES = [
         ]
 
 
+REGIONS = (
+        'a-geo-1',
+        'a-geo-2'
+        )
+ZONES = (
+        'az-1',
+        'az-2',
+        'az-3',
+)
+
 URLS = dict(
         _LOGIN_URL = (
             'https://console.hpcloud.com/login'
-            #'https://console.hpcloud.com/invoices?year=2012'
             ),
         _BILLS_URL = (
-            #'https://console.hpcloud.com/invoices'
-            'https://console.hpcloud.com/invoices?year=2012'
+            'https://console.hpcloud.com/invoices'
           ),
+        _SERVERS_URL = 'https://console.hpcloud.com/compute/{zone}_region-{region}/servers.json',
+        _FILES_URL = 'https://console.hpcloud.com/object_store/region-{region}/containers',
         )
 

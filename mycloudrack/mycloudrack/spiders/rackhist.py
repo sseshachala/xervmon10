@@ -104,6 +104,8 @@ class RackSpiderHistorical(RackSpiderBase):
             errItem['number'] += sum([1 for inst in obj['servers']
                 if inst['status'] == 'ERROR'])
         yield item
+        yield buildItem
+        yield errItem
 
 
     def parse_invoice_list(self, response):

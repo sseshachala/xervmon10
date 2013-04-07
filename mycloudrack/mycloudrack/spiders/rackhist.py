@@ -1,5 +1,6 @@
 
 import json
+import copy
 import datetime
 from urlparse import urljoin
 

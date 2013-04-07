@@ -123,7 +123,8 @@ class Hpcloud2Spider(CrawlSpider):
             item = HPCloudService(region=region, number=0)
             meta = {'item': item}
             headers = {
-                    'X-Requested-With':'XMLHttpRequest'
+                    'X-Requested-With':'XMLHttpRequest',
+                    'Accept':'application/json, text/javascript, */*; q=0.01',
                     }
             yield Request(self._FILES_URL.format(region=region),
                     headers=headers,

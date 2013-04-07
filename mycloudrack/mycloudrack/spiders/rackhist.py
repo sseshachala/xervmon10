@@ -98,11 +98,12 @@ class RackSpiderHistorical(RackSpiderBase):
         buildItem = copy.deepcopy(item)
         buildItem['name'] = 'build servers'
         if obj:
-            actItem['number'] += sum([1 for inst in obj
+            servers = obj['servers']
+            actItem['number'] += sum([1 for inst in servers
                 if inst['status'] == 'Active'])
-            buildItem['number'] += sum([1 for inst in obj
+            buildItem['number'] += sum([1 for inst in servers
                 if inst['status'] == 'Build'])
-            errItem['number'] += sum([1 for inst in obj
+            errItem['number'] += sum([1 for inst in servers
                 if inst['status'] == 'Error'])
         yield actItem
         yield buildItem
